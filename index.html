@@ -16,6 +16,7 @@
             --danger: #ef4444;
             --warning: #f59e0b;
             --info: #3b82f6;
+            --purple: #8b5cf6;
         }
 
         * {
@@ -69,6 +70,8 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             z-index: 999;
             padding: 0 8px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .tab {
@@ -76,6 +79,7 @@
             cursor: pointer;
             background: transparent;
             flex: 1;
+            min-width: 120px;
             text-align: center;
             color: #6b7280;
             font-weight: 600;
@@ -87,6 +91,7 @@
             justify-content: center;
             gap: 6px;
             font-size: 13px;
+            white-space: nowrap;
         }
 
         .tab.active {
@@ -166,6 +171,7 @@
             font-size: 14px;
             width: 100%;
             margin-bottom: 8px;
+            -webkit-appearance: none;
         }
 
         button {
@@ -175,6 +181,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: background 0.2s;
+            min-height: 44px;
         }
 
         button:hover {
@@ -190,6 +197,7 @@
             display: flex;
             gap: 8px;
             margin-top: 12px;
+            flex-wrap: wrap;
         }
 
         .servicos-lista, #listaServicos {
@@ -209,11 +217,16 @@
             flex-direction: column;
             justify-content: space-between;
             cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .servico-card:hover {
+            transform: translateY(-2px);
         }
 
         .servico-card.finalizado {
             border-left-color: var(--success);
-            opacity: 0.8;
+            opacity: 0.9;
         }
 
         .servico-card.em-andamento {
@@ -225,17 +238,24 @@
             opacity: 0.8;
         }
 
-        .vencimento-item {
-            background: white;
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-            border-left: 4px solid var(--warning);
+        .servico-card.pago {
+            position: relative;
+            overflow: hidden;
         }
 
-        .vencimento-item.atrasado { border-left-color: var(--danger); }
-        .vencimento-item.pago { border-left-color: var(--success); opacity: 0.8; }
+        .servico-card.pago::after {
+            content: '✅ PAGO';
+            position: absolute;
+            top: 10px;
+            right: -30px;
+            background: var(--success);
+            color: white;
+            padding: 4px 30px;
+            font-size: 10px;
+            font-weight: bold;
+            transform: rotate(45deg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
 
         .notificacao {
             position: fixed;
@@ -249,6 +269,8 @@
             z-index: 1001;
             display: none;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            max-width: 90%;
+            text-align: center;
         }
 
         .notificacao.sucesso { background: var(--success); }
@@ -334,11 +356,6 @@
             cursor: pointer;
         }
 
-        #confirmEditModal .modal-content {
-            max-width: 500px;
-            width: 100%;
-        }
-
         .servico-item {
             display: flex;
             justify-content: space-between;
@@ -351,8 +368,9 @@
             font-size: 14px;
         }
 
-        .servico-item.finalizado { border-left-color: var(--success); opacity: 0.8; }
+        .servico-item.finalizado { border-left-color: var(--success); opacity: 0.9; }
         .servico-item.cancelado { border-left-color: var(--danger); }
+        .servico-item.pago { background: #f0fdf4; }
         
         .dashboard-layout {
             display: flex;
@@ -424,6 +442,10 @@
         @media (min-width: 768px) {
             .form-grid.grid-2-cols {
                 grid-template-columns: 1fr 1fr; 
+            }
+            
+            .form-grid.grid-3-cols {
+                grid-template-columns: 1fr 1fr 1fr;
             }
         }
         
@@ -520,6 +542,111 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        /* BADGES PARA STATUS */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .status-andamento { background: #fef3c7; color: #92400e; }
+        .status-finalizado { background: #d1fae5; color: #065f46; }
+        .status-cancelado { background: #fee2e2; color: #991b1b; }
+        
+        .pagamento-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+            margin-left: 5px;
+        }
+        
+        .pagamento-pago { background: #d1fae5; color: #065f46; }
+        .pagamento-pendente { background: #fef3c7; color: #92400e; }
+
+        /* DURAÇÃO DO SERVIÇO */
+        .duracao-info {
+            background: #f8fafc;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* MELHORIAS MOBILE */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 120px;
+            }
+            
+            .tabs {
+                top: 60px;
+                padding: 0 5px;
+            }
+            
+            .tab {
+                padding: 10px 8px;
+                font-size: 12px;
+                min-width: 100px;
+            }
+            
+            .tab i {
+                font-size: 14px;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-buttons button {
+                width: 100%;
+            }
+            
+            .servicos-lista, #listaServicos {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .metric-card {
+                padding: 12px;
+            }
+            
+            .metric-card .value {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                font-size: 18px;
+                padding: 12px 15px;
+            }
+            
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-grid.grid-2-cols,
+            .form-grid.grid-3-cols {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 
@@ -635,18 +762,29 @@
             <span>Serviços</span>
         </div>
         <div class="tab" onclick="abrirTab('relatorios')">
-            <i class="fas fa-file-alt"></i>
+            <i class="fas fa-file-pdf"></i>
             <span>Relatórios</span>
+        </div>
+        <div class="tab" onclick="abrirTab('backup')">
+            <i class="fas fa-database"></i>
+            <span>Backup</span>
         </div>
     </div>
 
     <div class="container">
+        <!-- DASHBOARD -->
         <div id="dashboard" class="tab-content active">
             <div class="dashboard-layout">
                 <div class="dashboard-main">
                     <div class="card">
                         <h2><i class="fas fa-tachometer-alt"></i> Resumo Financeiro</h2>
                         <div class="summary-grid" id="dashboardGrid">
+                            </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h2><i class="fas fa-chart-bar"></i> Métricas de Serviços</h2>
+                        <div class="summary-grid" id="metricasGrid">
                             </div>
                     </div>
                 </div>
@@ -657,14 +795,16 @@
                         <div id="listaServicosRecentes">
                             </div>
                     </div>
-                    <div class="info-box warning">
-                        <i class="fas fa-lightbulb"></i>
-                        <strong>Dica:</strong> Registre todos os custos para calcular o lucro real dos serviços.
+                    <div class="card">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Pendências</h3>
+                        <div id="listaPendencias">
+                            </div>
                     </div>
                 </div>
             </div>
         </div>
         
+        <!-- SERVIÇOS -->
         <div id="servicos" class="tab-content">
             <div class="info-box warning">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -681,27 +821,48 @@
                                 <label for="descricaoServico">Descrição do Serviço:</label>
                                 <input type="text" id="descricaoServico" placeholder="Ex: Instalação de câmeras, cerca elétrica..." required>
                             </div>
+                            
                             <div class="form-group">
                                 <label for="clienteServico">Cliente:</label>
                                 <input type="text" id="clienteServico" placeholder="Nome do cliente" required>
                             </div>
+                            
                             <div class="form-group">
-                                <label for="dataServico">Data do Serviço:</label>
-                                <input type="date" id="dataServico" required>
+                                <label for="telefoneCliente">Telefone:</label>
+                                <input type="tel" id="telefoneCliente" placeholder="(11) 99999-9999">
                             </div>
+                            
+                            <div class="form-group">
+                                <label for="dataInicio">Data Início:</label>
+                                <input type="date" id="dataInicio" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="dataFim">Data Fim (Previsão):</label>
+                                <input type="date" id="dataFim">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="duracaoDias">Duração (dias):</label>
+                                <input type="number" id="duracaoDias" min="1" placeholder="1" onchange="calcularDataFim()">
+                            </div>
+                            
                             <div class="form-group">
                                 <label for="valorServico">Valor do Serviço (R$):</label>
                                 <input type="number" id="valorServico" step="0.01" min="0" placeholder="1000.00" required>
                             </div>
+                            
                             <div class="form-group">
                                 <label for="custoMateriais">Custo com Materiais (R$):</label>
                                 <input type="number" id="custoMateriais" step="0.01" min="0" placeholder="300.00" required>
                             </div>
+                            
                             <div class="form-group">
                                 <label for="custoCombustivel">Custo com Combustível (R$):</label>
                                 <input type="number" id="custoCombustivel" step="0.01" min="0" placeholder="50.00" required>
                             </div>
-                            <div class="form-group full-width">
+                            
+                            <div class="form-group">
                                 <label for="statusServico">Status do Serviço:</label>
                                 <select id="statusServico" required>
                                     <option value="em-andamento">Em Andamento</option>
@@ -709,10 +870,21 @@
                                     <option value="cancelado">Cancelado</option>
                                 </select>
                             </div>
+                            
+                            <div class="form-group">
+                                <label for="statusPagamento">Status do Pagamento:</label>
+                                <select id="statusPagamento" required>
+                                    <option value="pendente">Pendente</option>
+                                    <option value="pago">Pago</option>
+                                    <option value="parcial">Parcial</option>
+                                </select>
+                            </div>
+                            
                             <div class="form-group full-width">
                                 <label for="observacaoServico">Observações:</label>
                                 <textarea id="observacaoServico" placeholder="Detalhes do serviço, endereço, etc..." rows="3"></textarea>
                             </div>
+                            
                             <input type="hidden" id="servicoIdEdicao">
                         </div>
 
@@ -753,28 +925,72 @@
                         <ul style="margin: 10px 0; padding-left: 20px;">
                             <li>Registre TODOS os custos para cálculo preciso do lucro.</li>
                             <li>Atualize o status quando finalizar um serviço.</li>
-                            <li>Use a aba Relatórios para análises detalhadas.</li>
+                            <li>Marque como "Pago" quando receber o pagamento.</li>
+                            <li>Use a data fim para controlar prazos de entrega.</li>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- RELATÓRIOS -->
         <div id="relatorios" class="tab-content">
             <div class="config-grid">
                 <div class="card" style="border-left-color: var(--danger);">
-                    <h2><i class="fas fa-file-pdf"></i> Geração de Relatórios</h2>
-                    <p>Gere relatórios detalhados para análise financeira e controle de serviços.</p>
-                    <div class="action-buttons" style="flex-direction: column;">
-                        <button onclick="gerarRelatorioPDF()" style="background: var(--danger);">
-                            <i class="fas fa-file-pdf"></i> Relatório Completo (PDF)
-                        </button>
-                        <button onclick="gerarRelatorioCSV()" style="background: var(--success);">
-                            <i class="fas fa-file-excel"></i> Exportar Dados (CSV para Excel)
+                    <h2><i class="fas fa-file-pdf"></i> Relatório Completo (PDF)</h2>
+                    <p>Relatório detalhado em formato paisagem com todos os serviços.</p>
+                    <div class="action-buttons">
+                        <button onclick="gerarRelatorioCompletoPDF()" style="background: var(--danger);">
+                            <i class="fas fa-file-pdf"></i> Gerar Relatório Completo
                         </button>
                     </div>
                 </div>
 
+                <div class="card" style="border-left-color: var(--info);">
+                    <h2><i class="fas fa-chart-pie"></i> Relatório Financeiro</h2>
+                    <p>Análise financeira com gráficos e métricas de lucratividade.</p>
+                    <div class="action-buttons">
+                        <button onclick="gerarRelatorioFinanceiroPDF()" style="background: var(--info);">
+                            <i class="fas fa-chart-bar"></i> Relatório Financeiro
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card" style="border-left-color: var(--success);">
+                    <h2><i class="fas fa-file-excel"></i> Exportar Dados</h2>
+                    <p>Exporte os dados para Excel (CSV) para análises externas.</p>
+                    <div class="action-buttons">
+                        <button onclick="gerarRelatorioCSV()" style="background: var(--success);">
+                            <i class="fas fa-file-excel"></i> Exportar para Excel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card" style="border-left-color: var(--warning);">
+                    <h2><i class="fas fa-calendar-alt"></i> Relatório por Período</h2>
+                    <p>Relatório personalizado por período específico.</p>
+                    <div class="form-grid grid-2-cols">
+                        <div class="form-group">
+                            <label for="dataInicioRelatorio">Data Início:</label>
+                            <input type="date" id="dataInicioRelatorio">
+                        </div>
+                        <div class="form-group">
+                            <label for="dataFimRelatorio">Data Fim:</label>
+                            <input type="date" id="dataFimRelatorio">
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button onclick="gerarRelatorioPeriodoPDF()" style="background: var(--warning);">
+                            <i class="fas fa-filter"></i> Gerar Relatório do Período
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BACKUP E CONFIGURAÇÕES -->
+        <div id="backup" class="tab-content">
+            <div class="config-grid">
                 <div class="card" style="border-left-color: var(--info);">
                     <h2><i class="fab fa-google-drive"></i> Backup no Google Drive</h2>
                     <p>Faça backup ou restaure seus dados de serviços diretamente do seu Google Drive.</p>
@@ -788,26 +1004,16 @@
                         <button id="btnCarregarDrive" onclick="carregarBackupDrive()" style="background: var(--warning);" class="btn-drive">
                             <i class="fas fa-cloud-download-alt"></i> Carregar Backup do Drive
                         </button>
-                    </div>
-                </div>
-                
-                <div class="card" style="border-left-color: var(--info);">
-                    <h2><i class="fas fa-upload"></i> Importar Dados (JSON)</h2>
-                    <p>Importe dados de backup no formato JSON para restaurar informações.</p>
-                    <div class="form-group">
-                        <label for="arquivoBackup">Selecione o arquivo de backup (.json):</label>
-                        <input type="file" id="arquivoBackup" accept=".json">
-                    </div>
-                    <div class="action-buttons">
-                        <button onclick="importarDados()" style="background: var(--info);">
-                            <i class="fas fa-upload"></i> Carregar Dados do Arquivo
+                        <!-- BOTÃO TEMPORÁRIO PARA DEBUG - REMOVA DEPOIS -->
+                        <button onclick="listarTodosArquivosDrive()" style="background: #6b7280; margin-top: 10px;">
+                            <i class="fas fa-bug"></i> Debug: Listar Arquivos
                         </button>
                     </div>
                 </div>
                 
                 <div class="card" style="border-left-color: var(--primary);">
-                    <h2><i class="fas fa-database"></i> Gerenciar e Exportar Dados</h2>
-                    <p>Faça backup dos dados ou gere dados de exemplo para testar o sistema.</p>
+                    <h2><i class="fas fa-database"></i> Gerenciar Dados</h2>
+                    <p>Faça backup local ou gerencie os dados do sistema.</p>
                     <div class="action-buttons" style="flex-direction: column;">
                         <button onclick="exportarDados()" style="background: var(--primary);">
                             <i class="fas fa-download"></i> Exportar Backup (JSON)
@@ -820,6 +1026,30 @@
                         </button>
                     </div>
                 </div>
+
+                <div class="card" style="border-left-color: var(--purple);">
+                    <h2><i class="fas fa-upload"></i> Importar Dados</h2>
+                    <p>Importe dados de backup no formato JSON para restaurar informações.</p>
+                    <div class="form-group">
+                        <label for="arquivoBackup">Selecione o arquivo de backup (.json):</label>
+                        <input type="file" id="arquivoBackup" accept=".json">
+                    </div>
+                    <div class="action-buttons">
+                        <button onclick="importarDados()" style="background: var(--purple);">
+                            <i class="fas fa-upload"></i> Carregar Dados do Arquivo
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card" style="border-left-color: var(--success);">
+                    <h2><i class="fas fa-mobile-alt"></i> Instalar App</h2>
+                    <p>Instale o ControlServ no seu celular para uso offline.</p>
+                    <div class="action-buttons">
+                        <button id="btnInstalarApp" onclick="instalarApp()" style="background: var(--success);">
+                            <i class="fas fa-download"></i> Instalar App no Celular
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -827,17 +1057,7 @@
     <div id="notificacao" class="notificacao"></div>
 
     <div class="footer">
-        Desenvolvido por <strong>ControlServ</strong> - Gestão de Serviços v1.0
-    </div>
-    
-    <div id="editModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close-button" onclick="fecharModalEdicao()">&times;</span>
-            <h3 style="color: var(--primary); margin-bottom: 20px;"><i class="fas fa-edit"></i> Editar Serviço</h3>
-
-            <div id="modalDetalhesServico" style="margin-bottom: 20px; padding: 10px; background: #f0f9ff; border-radius: 8px;">
-                </div>
-        </div>
+        Desenvolvido por <strong>Juniorxam Tecnologia</strong> - ControlServ v2.0
     </div>
 
     <script>
@@ -846,11 +1066,13 @@
         // ========================================
         let deferredPrompt;
         const installButton = document.getElementById('installButton');
+        const btnInstalarApp = document.getElementById('btnInstalarApp');
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             installButton.style.display = 'block';
+            btnInstalarApp.style.display = 'block';
             
             installButton.addEventListener('click', async () => {
                 installButton.style.display = 'none';
@@ -865,8 +1087,23 @@
 
         window.addEventListener('appinstalled', () => {
             installButton.style.display = 'none';
+            btnInstalarApp.style.display = 'none';
             deferredPrompt = null;
         });
+
+        function instalarApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        mostrarNotificacao('App instalado com sucesso!', 'sucesso');
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                mostrarNotificacao('O app já está instalado ou não suporta instalação.', 'info');
+            }
+        }
 
         // ========================================
         // SISTEMA DE DADOS
@@ -922,7 +1159,7 @@
             updateDriveStatus('Google Drive pronto para uso', 'ready');
             hideLoading();
             
-            // Atualiza o status na aba de relatórios
+            // Atualiza o status na aba de backup
             const driveStatusCard = document.getElementById('driveStatusCard');
             if (driveStatusCard) {
                 driveStatusCard.textContent = 'Google Drive conectado e pronto';
@@ -943,25 +1180,52 @@
 
         async function searchBackupFile() {
             try {
+                console.log('Buscando arquivo de backup no Drive...');
+                
                 const response = await gapi.client.drive.files.list({
-                    q: `name='${BACKUP_FILE_NAME}' and trashed=false`,
-                    fields: 'files(id, name)',
+                    q: "name contains 'ControlServ_Backup' and mimeType='application/json' and trashed=false",
+                    fields: 'files(id, name, createdTime, modifiedTime)',
                     spaces: 'drive',
-                    pageSize: 1
+                    pageSize: 10,
+                    orderBy: 'modifiedTime desc'
                 });
 
+                console.log('Resposta da busca:', response);
+
                 if (response.result.files && response.result.files.length > 0) {
-                    fileId = response.result.files[0].id;
-                    mostrarNotificacao(`Arquivo de backup encontrado no Drive.`, 'info');
-                    return true;
-                } else {
-                    fileId = null;
-                    mostrarNotificacao('Arquivo de backup não encontrado no Drive. Será criado um novo.', 'info');
-                    return false;
+                    // Encontra o arquivo mais recente que contenha "ControlServ_Backup" no nome
+                    const backupFiles = response.result.files.filter(file => 
+                        file.name.includes('ControlServ_Backup') && 
+                        file.name.endsWith('.json')
+                    );
+                    
+                    if (backupFiles.length > 0) {
+                        // Pega o arquivo mais recente
+                        const latestBackup = backupFiles[0];
+                        fileId = latestBackup.id;
+                        
+                        console.log('Arquivo encontrado:', latestBackup);
+                        mostrarNotificacao(`Backup encontrado: ${latestBackup.name}`, 'info');
+                        return true;
+                    }
                 }
+                
+                fileId = null;
+                console.log('Nenhum arquivo de backup encontrado');
+                mostrarNotificacao('Nenhum arquivo de backup encontrado no Drive.', 'info');
+                return false;
+                
             } catch (error) {
                 console.error('Erro ao buscar arquivo no Drive:', error);
-                return false; 
+                
+                // Mostra detalhes do erro
+                if (error.result && error.result.error) {
+                    console.error('Detalhes do erro:', error.result.error);
+                    mostrarNotificacao(`Erro na busca: ${error.result.error.message}`, 'erro');
+                } else {
+                    mostrarNotificacao('Erro ao buscar arquivos no Drive. Verifique as permissões.', 'erro');
+                }
+                return false;
             }
         }
         
@@ -978,7 +1242,7 @@
 
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) {
-                    mostrarNotificacao('Autorização do Drive negada ou erro.', 'erro');
+                    mostrarNotificacao('Autorização do Drive negada ou erro: ' + resp.error, 'erro');
                     setDriveButtonLoading('btnSalvarDrive', false);
                     hideLoading();
                     return;
@@ -1063,48 +1327,98 @@
 
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) {
-                    mostrarNotificacao('Autorização do Drive negada ou erro.', 'erro');
+                    mostrarNotificacao('Autorização do Drive negada ou erro: ' + resp.error, 'erro');
                     setDriveButtonLoading('btnCarregarDrive', false);
                     hideLoading();
                     return;
                 }
 
-                showLoading('Autenticado. Buscando arquivo...');
+                showLoading('Autenticado. Buscando backup...');
                 
                 try {
+                    console.log('Iniciando busca por arquivos de backup...');
                     let found = await searchBackupFile();
                     
                     if (!found || !fileId) {
-                        mostrarNotificacao('Nenhum arquivo de backup encontrado no Drive.', 'erro');
+                        mostrarNotificacao('Nenhum arquivo de backup encontrado no Drive. Certifique-se de que o arquivo existe e tem o nome "ControlServ_Backup".', 'erro');
                         setDriveButtonLoading('btnCarregarDrive', false);
                         hideLoading();
                         return;
                     }
                     
-                    showLoading(`Baixando backup...`);
+                    showLoading(`Baixando backup (ID: ${fileId})...`);
 
-                    // Faz o download do conteúdo do arquivo (alt=media)
+                    // Primeiro verifica se podemos acessar o arquivo
+                    try {
+                        const fileInfo = await gapi.client.drive.files.get({
+                            fileId: fileId,
+                            fields: 'id, name, mimeType, size'
+                        });
+                        console.log('Informações do arquivo:', fileInfo.result);
+                    } catch (infoError) {
+                        console.error('Erro ao obter informações do arquivo:', infoError);
+                        mostrarNotificacao('Erro ao acessar o arquivo de backup. Verifique as permissões.', 'erro');
+                        setDriveButtonLoading('btnCarregarDrive', false);
+                        hideLoading();
+                        return;
+                    }
+
+                    // Faz o download do conteúdo do arquivo
+                    showLoading('Lendo conteúdo do backup...');
                     const response = await gapi.client.drive.files.get({
                         fileId: fileId,
-                        alt: 'media' 
+                        alt: 'media'
                     });
 
-                    if (confirm("ATENÇÃO: A importação irá SOBRESCREVER os dados atuais. Deseja continuar?")) {
+                    console.log('Conteúdo recebido:', response.result);
+
+                    if (confirm("ATENÇÃO: A importação irá SOBRESCREVER todos os dados atuais. Deseja continuar?")) {
                         const data = response.result;
-                        if (!data.servicos) {
-                             mostrarNotificacao('O arquivo JSON do Drive não está no formato esperado.', 'erro');
-                             return;
+                        
+                        // Validação mais robusta dos dados
+                        if (!data) {
+                            mostrarNotificacao('O arquivo está vazio ou corrompido.', 'erro');
+                            return;
                         }
                         
-                        servicos = data.servicos;
+                        if (!data.servicos || !Array.isArray(data.servicos)) {
+                            mostrarNotificacao('O arquivo não contém dados válidos do ControlServ.', 'erro');
+                            return;
+                        }
+
+                        // Valida cada serviço antes de importar
+                        const servicosValidos = data.servicos.filter(servico => 
+                            servico && 
+                            servico.id && 
+                            servico.descricao && 
+                            servico.cliente
+                        );
+
+                        if (servicosValidos.length === 0) {
+                            mostrarNotificacao('Nenhum serviço válido encontrado no backup.', 'erro');
+                            return;
+                        }
+
+                        servicos = servicosValidos;
                         salvarDados();
                         checkInitializers();
-                        mostrarNotificacao('Dados carregados com sucesso do Google Drive!', 'sucesso');
+                        mostrarNotificacao(`Backup carregado com sucesso! ${servicos.length} serviços recuperados.`, 'sucesso');
                     }
 
                 } catch (e) {
-                    console.error('Erro no download do Drive:', e);
-                    mostrarNotificacao('Erro ao carregar o backup do Google Drive.', 'erro');
+                    console.error('Erro detalhado no carregamento:', e);
+                    
+                    let errorMessage = 'Erro ao carregar o backup do Google Drive.';
+                    
+                    if (e.status === 404) {
+                        errorMessage = 'Arquivo não encontrado. Pode ter sido excluído ou movido.';
+                    } else if (e.status === 403) {
+                        errorMessage = 'Sem permissão para acessar o arquivo.';
+                    } else if (e.result && e.result.error) {
+                        errorMessage = `Erro do Drive: ${e.result.error.message}`;
+                    }
+                    
+                    mostrarNotificacao(errorMessage, 'erro');
                 } finally {
                     setDriveButtonLoading('btnCarregarDrive', false);
                     hideLoading();
@@ -1112,6 +1426,25 @@
             };
 
             tokenClient.requestAccessToken();
+        }
+
+        // Função para debug - lista todos os arquivos no Drive
+        async function listarTodosArquivosDrive() {
+            if (!checkDriveReady()) return;
+            
+            try {
+                const response = await gapi.client.drive.files.list({
+                    pageSize: 20,
+                    fields: 'files(id, name, mimeType, createdTime, modifiedTime)',
+                    spaces: 'drive'
+                });
+                
+                console.log('Todos os arquivos no Drive:', response.result.files);
+                mostrarNotificacao(`Encontrados ${response.result.files.length} arquivos. Verifique o console.`, 'info');
+            } catch (error) {
+                console.error('Erro ao listar arquivos:', error);
+                mostrarNotificacao('Erro ao listar arquivos do Drive', 'erro');
+            }
         }
         
         // ========================================
@@ -1149,6 +1482,12 @@
                 return 'Data Inválida';
             }
         }
+
+        function formatarTelefone(telefone) {
+            if (!telefone) return 'N/A';
+            // Formatação simples de telefone
+            return telefone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        }
         
         function obterDataHojeISO() {
             return new Date().toISOString().split('T')[0];
@@ -1159,6 +1498,28 @@
             const custoMateriais = servico.custoMateriais || 0;
             const custoCombustivel = servico.custoCombustivel || 0;
             return valorServico - custoMateriais - custoCombustivel;
+        }
+
+        function calcularDuracaoDias(dataInicio, dataFim) {
+            if (!dataInicio || !dataFim) return 0;
+            const inicio = new Date(dataInicio);
+            const fim = new Date(dataFim);
+            const diffTime = Math.abs(fim - inicio);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays + 1; // Inclui o dia inicial
+        }
+
+        function calcularDataFim() {
+            const dataInicio = document.getElementById('dataInicio').value;
+            const duracaoDias = parseInt(document.getElementById('duracaoDias').value) || 1;
+            
+            if (dataInicio) {
+                const dataInicioObj = new Date(dataInicio);
+                const dataFimObj = new Date(dataInicioObj);
+                dataFimObj.setDate(dataInicioObj.getDate() + duracaoDias - 1);
+                
+                document.getElementById('dataFim').value = dataFimObj.toISOString().split('T')[0];
+            }
         }
 
         function abrirTab(tabName) {
@@ -1178,7 +1539,9 @@
             }
             
             if (tabName === 'servicos') {
-                document.getElementById('dataServico').value = obterDataHojeISO();
+                document.getElementById('dataInicio').value = obterDataHojeISO();
+                document.getElementById('duracaoDias').value = 1;
+                calcularDataFim();
             }
             
             if (tabName === 'dashboard') {
@@ -1186,7 +1549,7 @@
             } else if (tabName === 'servicos') {
                 carregarServicos();
                 limparFormularioServico(true);
-            } else if (tabName === 'relatorios') {
+            } else if (tabName === 'backup') {
                 // Atualiza status do Drive
                 const driveStatusCard = document.getElementById('driveStatusCard');
                 if (driveStatusCard) {
@@ -1219,7 +1582,8 @@
             const servicosFiltrados = servicos.filter(servico => 
                 servico.cliente.toLowerCase().includes(filtro) || 
                 servico.status.toLowerCase().includes(filtro) ||
-                servico.descricao.toLowerCase().includes(filtro)
+                servico.descricao.toLowerCase().includes(filtro) ||
+                (servico.statusPagamento && servico.statusPagamento.toLowerCase().includes(filtro))
             );
 
             if (servicosFiltrados.length === 0) {
@@ -1236,16 +1600,32 @@
                     'cancelado': 'Cancelado'
                 }[servico.status] || servico.status;
 
+                const pagamentoText = {
+                    'pago': 'Pago',
+                    'pendente': 'Pendente',
+                    'parcial': 'Parcial'
+                }[servico.statusPagamento] || 'Pendente';
+
+                const pagamentoClass = servico.statusPagamento === 'pago' ? 'pagamento-pago' : 
+                                      servico.statusPagamento === 'parcial' ? 'pagamento-pendente' : 'pagamento-pendente';
+
+                const duracao = servico.duracaoDias || calcularDuracaoDias(servico.dataInicio, servico.dataFim);
+                const cardClass = servico.statusPagamento === 'pago' ? `${statusClass} pago` : statusClass;
+
                 return `
-                    <div class="servico-card ${statusClass}" onclick="editarServico(${servico.id})">
+                    <div class="servico-card ${cardClass}" onclick="editarServico(${servico.id})">
                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-                            <h3 style="margin: 0;">${servico.descricao}</h3>
-                            <span style="background: ${servico.status === 'finalizado' ? '#d1fae5' : servico.status === 'cancelado' ? '#fee2e2' : '#fef3c7'}; color: ${servico.status === 'finalizado' ? '#065f46' : servico.status === 'cancelado' ? '#991b1b' : '#92400e'}; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">
-                                ${statusText}
-                            </span>
+                            <h3 style="margin: 0; flex: 1;">${servico.descricao}</h3>
+                            <div style="display: flex; flex-direction: column; align-items: end; gap: 4px;">
+                                <span class="status-badge status-${servico.status}">${statusText}</span>
+                                <span class="pagamento-badge ${pagamentoClass}">${pagamentoText}</span>
+                            </div>
                         </div>
                         <p><strong>👤 Cliente:</strong> ${servico.cliente}</p>
-                        <p><strong>📅 Data:</strong> ${formatarData(servico.data)}</p>
+                        ${servico.telefone ? `<p><strong>📞 Telefone:</strong> ${formatarTelefone(servico.telefone)}</p>` : ''}
+                        <p><strong>📅 Início:</strong> ${formatarData(servico.dataInicio)}</p>
+                        ${servico.dataFim ? `<p><strong>📅 Fim:</strong> ${formatarData(servico.dataFim)}</p>` : ''}
+                        ${duracao > 0 ? `<p><strong>⏱️ Duração:</strong> ${duracao} dia${duracao > 1 ? 's' : ''}</p>` : ''}
                         <p><strong>💰 Valor:</strong> ${formatarMoeda(servico.valorServico)}</p>
                         <p><strong>🔧 Materiais:</strong> ${formatarMoeda(servico.custoMateriais)}</p>
                         <p><strong>⛽ Combustível:</strong> ${formatarMoeda(servico.custoCombustivel)}</p>
@@ -1259,11 +1639,15 @@
         function limparFormularioServico(cancelarEdicao = false) {
             document.getElementById('descricaoServico').value = '';
             document.getElementById('clienteServico').value = '';
-            document.getElementById('dataServico').value = obterDataHojeISO();
+            document.getElementById('telefoneCliente').value = '';
+            document.getElementById('dataInicio').value = obterDataHojeISO();
+            document.getElementById('dataFim').value = '';
+            document.getElementById('duracaoDias').value = 1;
             document.getElementById('valorServico').value = '';
             document.getElementById('custoMateriais').value = '';
             document.getElementById('custoCombustivel').value = '';
             document.getElementById('statusServico').value = 'em-andamento';
+            document.getElementById('statusPagamento').value = 'pendente';
             document.getElementById('observacaoServico').value = '';
             document.getElementById('servicoIdEdicao').value = '';
             
@@ -1282,15 +1666,19 @@
         function adicionarServico() {
             const descricao = document.getElementById('descricaoServico').value.trim();
             const cliente = document.getElementById('clienteServico').value.trim();
-            const data = document.getElementById('dataServico').value;
+            const telefone = document.getElementById('telefoneCliente').value.trim();
+            const dataInicio = document.getElementById('dataInicio').value;
+            const dataFim = document.getElementById('dataFim').value;
+            const duracaoDias = parseInt(document.getElementById('duracaoDias').value) || 1;
             const valorServico = parseFloat(document.getElementById('valorServico').value) || 0;
             const custoMateriais = parseFloat(document.getElementById('custoMateriais').value) || 0;
             const custoCombustivel = parseFloat(document.getElementById('custoCombustivel').value) || 0;
             const status = document.getElementById('statusServico').value;
+            const statusPagamento = document.getElementById('statusPagamento').value;
             const observacao = document.getElementById('observacaoServico').value.trim();
 
-            if (!descricao || !cliente || !data || valorServico <= 0) {
-                mostrarNotificacao('Descrição, Cliente, Data e Valor do Serviço são obrigatórios.', 'erro');
+            if (!descricao || !cliente || !dataInicio || valorServico <= 0) {
+                mostrarNotificacao('Descrição, Cliente, Data Início e Valor do Serviço são obrigatórios.', 'erro');
                 return;
             }
 
@@ -1298,11 +1686,15 @@
                 id: Date.now(),
                 descricao,
                 cliente,
-                data,
+                telefone,
+                dataInicio,
+                dataFim,
+                duracaoDias,
                 valorServico,
                 custoMateriais,
                 custoCombustivel,
                 status,
+                statusPagamento,
                 observacao,
                 dataCadastro: obterDataHojeISO()
             };
@@ -1324,11 +1716,15 @@
 
             document.getElementById('descricaoServico').value = servico.descricao || '';
             document.getElementById('clienteServico').value = servico.cliente || '';
-            document.getElementById('dataServico').value = servico.data || '';
+            document.getElementById('telefoneCliente').value = servico.telefone || '';
+            document.getElementById('dataInicio').value = servico.dataInicio || '';
+            document.getElementById('dataFim').value = servico.dataFim || '';
+            document.getElementById('duracaoDias').value = servico.duracaoDias || 1;
             document.getElementById('valorServico').value = servico.valorServico || '';
             document.getElementById('custoMateriais').value = servico.custoMateriais || '';
             document.getElementById('custoCombustivel').value = servico.custoCombustivel || '';
             document.getElementById('statusServico').value = servico.status || 'em-andamento';
+            document.getElementById('statusPagamento').value = servico.statusPagamento || 'pendente';
             document.getElementById('observacaoServico').value = servico.observacao || '';
             document.getElementById('servicoIdEdicao').value = servico.id;
 
@@ -1350,29 +1746,38 @@
 
             const descricao = document.getElementById('descricaoServico').value.trim();
             const cliente = document.getElementById('clienteServico').value.trim();
-            const data = document.getElementById('dataServico').value;
+            const telefone = document.getElementById('telefoneCliente').value.trim();
+            const dataInicio = document.getElementById('dataInicio').value;
+            const dataFim = document.getElementById('dataFim').value;
+            const duracaoDias = parseInt(document.getElementById('duracaoDias').value) || 1;
             const valorServico = parseFloat(document.getElementById('valorServico').value) || 0;
             const custoMateriais = parseFloat(document.getElementById('custoMateriais').value) || 0;
             const custoCombustivel = parseFloat(document.getElementById('custoCombustivel').value) || 0;
             const status = document.getElementById('statusServico').value;
+            const statusPagamento = document.getElementById('statusPagamento').value;
             const observacao = document.getElementById('observacaoServico').value.trim();
 
-            if (!descricao || !cliente || !data || valorServico <= 0) {
-                mostrarNotificacao('Descrição, Cliente, Data e Valor do Serviço são obrigatórios.', 'erro');
+            if (!descricao || !cliente || !dataInicio || valorServico <= 0) {
+                mostrarNotificacao('Descrição, Cliente, Data Início e Valor do Serviço são obrigatórios.', 'erro');
                 return;
             }
 
             servicos[index].descricao = descricao;
             servicos[index].cliente = cliente;
-            servicos[index].data = data;
+            servicos[index].telefone = telefone;
+            servicos[index].dataInicio = dataInicio;
+            servicos[index].dataFim = dataFim;
+            servicos[index].duracaoDias = duracaoDias;
             servicos[index].valorServico = valorServico;
             servicos[index].custoMateriais = custoMateriais;
             servicos[index].custoCombustivel = custoCombustivel;
             servicos[index].status = status;
+            servicos[index].statusPagamento = statusPagamento;
             servicos[index].observacao = observacao;
 
             salvarDados();
             carregarServicos();
+            atualizarDashboard();
             limparFormularioServico(true);
             mostrarNotificacao(`Serviço "${descricao}" atualizado com sucesso!`, 'sucesso');
         }
@@ -1426,9 +1831,12 @@
 
             let servicosFinalizados = 0;
             let servicosAndamento = 0;
+            let servicosCancelados = 0;
+            let pagamentosPendentes = 0;
+            let valorPendente = 0;
 
             servicos.forEach(servico => {
-                const dataServico = new Date(servico.data + 'T00:00:00');
+                const dataServico = new Date(servico.dataInicio + 'T00:00:00');
                 const receita = servico.valorServico || 0;
                 const custos = (servico.custoMateriais || 0) + (servico.custoCombustivel || 0);
                 const lucro = receita - custos;
@@ -1441,6 +1849,13 @@
                 // Contagem por status
                 if (servico.status === 'finalizado') servicosFinalizados++;
                 if (servico.status === 'em-andamento') servicosAndamento++;
+                if (servico.status === 'cancelado') servicosCancelados++;
+
+                // Pagamentos pendentes
+                if (servico.statusPagamento !== 'pago') {
+                    pagamentosPendentes++;
+                    valorPendente += receita;
+                }
 
                 // Por período
                 if (dataServico.toDateString() === hoje.toDateString()) {
@@ -1462,7 +1877,7 @@
                 }
             });
 
-            // Renderização do Dashboard
+            // Renderização do Dashboard Financeiro
             document.getElementById('dashboardGrid').innerHTML = `
                 <div class="metric-card" style="border-top-color: var(--primary);">
                     <h3>LUCRO HOJE</h3>
@@ -1481,14 +1896,6 @@
                     <div class="value ${totalGeral.lucro >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(totalGeral.lucro)}</div>
                 </div>
                 
-                <div class="metric-card" style="border-top-color: var(--warning);">
-                    <h3>SERVIÇOS FINALIZADOS</h3>
-                    <div class="value">${servicosFinalizados}</div>
-                </div>
-                <div class="metric-card" style="border-top-color: var(--primary);">
-                    <h3>EM ANDAMENTO</h3>
-                    <div class="value">${servicosAndamento}</div>
-                </div>
                 <div class="metric-card" style="border-top-color: #764ba2;">
                     <h3>RECEITA TOTAL</h3>
                     <div class="value">${formatarMoeda(totalGeral.receita)}</div>
@@ -1497,9 +1904,38 @@
                     <h3>CUSTOS TOTAIS</h3>
                     <div class="value">${formatarMoeda(totalGeral.custos)}</div>
                 </div>
+                <div class="metric-card" style="border-top-color: var(--warning);">
+                    <h3>PENDENTES</h3>
+                    <div class="value">${formatarMoeda(valorPendente)}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: var(--purple);">
+                    <h3>PAG. PENDENTES</h3>
+                    <div class="value">${pagamentosPendentes}</div>
+                </div>
+            `;
+
+            // Métricas de Serviços
+            document.getElementById('metricasGrid').innerHTML = `
+                <div class="metric-card" style="border-top-color: var(--success);">
+                    <h3>FINALIZADOS</h3>
+                    <div class="value">${servicosFinalizados}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: var(--warning);">
+                    <h3>EM ANDAMENTO</h3>
+                    <div class="value">${servicosAndamento}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: var(--danger);">
+                    <h3>CANCELADOS</h3>
+                    <div class="value">${servicosCancelados}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: var(--primary);">
+                    <h3>TOTAL SERVIÇOS</h3>
+                    <div class="value">${servicos.length}</div>
+                </div>
             `;
 
             carregarServicosRecentes();
+            carregarPendencias();
         }
 
         function carregarServicosRecentes() {
@@ -1507,7 +1943,7 @@
             
             // Ordena serviços por data (mais recentes primeiro)
             const servicosRecentes = [...servicos]
-                .sort((a, b) => new Date(b.data) - new Date(a.data))
+                .sort((a, b) => new Date(b.dataInicio) - new Date(a.dataInicio))
                 .slice(0, 5);
 
             if (servicosRecentes.length === 0) {
@@ -1517,14 +1953,43 @@
 
             lista.innerHTML = servicosRecentes.map(servico => {
                 const lucro = calcularLucro(servico);
+                const pagamentoClass = servico.statusPagamento === 'pago' ? 'pago' : '';
                 return `
-                    <div class="servico-item ${servico.status}" onclick="editarServico(${servico.id})">
+                    <div class="servico-item ${servico.status} ${pagamentoClass}" onclick="editarServico(${servico.id})">
                         <div>
                             <strong>${servico.descricao}</strong>
                             <br>
-                            <small>${servico.cliente} - ${formatarData(servico.data)}</small>
+                            <small>${servico.cliente} - ${formatarData(servico.dataInicio)}</small>
                             <br>
                             <small>Lucro: <span class="${lucro >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(lucro)}</span></small>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function carregarPendencias() {
+            const lista = document.getElementById('listaPendencias');
+            
+            // Filtra serviços com pagamento pendente
+            const pendencias = servicos.filter(servico => 
+                servico.statusPagamento !== 'pago' && servico.status !== 'cancelado'
+            ).slice(0, 5);
+
+            if (pendencias.length === 0) {
+                lista.innerHTML = '<p style="text-align: center; color: #6b7280;">Nenhuma pendência encontrada.</p>';
+                return;
+            }
+
+            lista.innerHTML = pendencias.map(servico => {
+                return `
+                    <div class="servico-item em-andamento" onclick="editarServico(${servico.id})">
+                        <div>
+                            <strong>${servico.cliente}</strong>
+                            <br>
+                            <small>${servico.descricao}</small>
+                            <br>
+                            <small>Valor: ${formatarMoeda(servico.valorServico)}</small>
                         </div>
                     </div>
                 `;
@@ -1534,58 +1999,89 @@
         // ========================================
         // RELATÓRIOS
         // ========================================
-        function gerarRelatorioPDF() {
-            mostrarNotificacao('Gerando relatório PDF...', 'info');
+        function gerarRelatorioCompletoPDF() {
+            mostrarNotificacao('Gerando relatório completo...', 'info');
 
             if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined' || !window.jspdf.jsPDF.API.autoTable) {
-                mostrarNotificacao('Erro: As bibliotecas jspdf ou jspdf-autotable não estão carregadas. Recarregue a página.', 'erro');
+                mostrarNotificacao('Erro: Bibliotecas PDF não carregadas. Recarregue a página.', 'erro');
                 return;
             }
 
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'mm', 'a4');
+            // PDF em paisagem (landscape)
+            const doc = new jsPDF('l', 'mm', 'a4');
             const dataHoraAtual = new Date().toLocaleString('pt-BR');
 
-            const header = function(data) {
-                doc.setFontSize(10);
-                doc.setTextColor(40);
-                doc.text("ControlServ - Relatório de Serviços", data.settings.margin.left, 10);
-                doc.setFontSize(8);
-                doc.setTextColor(150);
-                doc.text(`Gerado em: ${dataHoraAtual}`, doc.internal.pageSize.getWidth() - 14, 10, { align: "right" });
-            };
+            // Cabeçalho
+            doc.setFontSize(16);
+            doc.setTextColor(40);
+            doc.text("RELATÓRIO COMPLETO - CONTROLSERV", 20, 20);
+            
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text(`Gerado em: ${dataHoraAtual}`, 250, 20, { align: "right" });
+            doc.text("Juniorxam Tecnologia", 250, 25, { align: "right" });
 
-            const footer = function(data) {
-                const pageCount = doc.internal.getNumberOfPages();
-                doc.setFontSize(8);
-                doc.setTextColor(150);
-                doc.text(`Página ${data.pageNumber} de ${pageCount}`, data.settings.margin.left, doc.internal.pageSize.getHeight() - 10);
-                doc.text("ControlServ - Gestão de Serviços", doc.internal.pageSize.getWidth() - 14, doc.internal.pageSize.getHeight() - 10, { align: "right" });
-            };
+            // Resumo Financeiro
+            let totalReceita = 0, totalCustos = 0, totalLucro = 0;
+            let servicosFinalizados = 0, servicosAndamento = 0, pagamentosPendentes = 0;
+
+            servicos.forEach(servico => {
+                totalReceita += servico.valorServico || 0;
+                totalCustos += (servico.custoMateriais || 0) + (servico.custoCombustivel || 0);
+                totalLucro += calcularLucro(servico);
+                if (servico.status === 'finalizado') servicosFinalizados++;
+                if (servico.status === 'em-andamento') servicosAndamento++;
+                if (servico.statusPagamento !== 'pago') pagamentosPendentes++;
+            });
+
+            doc.setFontSize(12);
+            doc.setTextColor(40);
+            doc.text("RESUMO FINANCEIRO", 20, 40);
+            
+            doc.setFontSize(10);
+            doc.text(`Receita Total: ${formatarMoeda(totalReceita)}`, 20, 50);
+            doc.text(`Custos Totais: ${formatarMoeda(totalCustos)}`, 20, 56);
+            doc.text(`Lucro Total: ${formatarMoeda(totalLucro)}`, 20, 62);
+            doc.text(`Serviços Finalizados: ${servicosFinalizados}`, 100, 50);
+            doc.text(`Serviços em Andamento: ${servicosAndamento}`, 100, 56);
+            doc.text(`Pagamentos Pendentes: ${pagamentosPendentes}`, 100, 62);
 
             // Tabela de Serviços
-            const servicosColumns = ["ID", "Descrição", "Cliente", "Data", "Valor", "Materiais", "Combustível", "Lucro", "Status"];
+            const servicosColumns = [
+                "ID", 
+                "Descrição", 
+                "Cliente", 
+                "Início", 
+                "Fim", 
+                "Valor", 
+                "Custos", 
+                "Lucro", 
+                "Status",
+                "Pagamento"
+            ];
+            
             const servicosData = servicos.map(s => {
+                const custos = (s.custoMateriais || 0) + (s.custoCombustivel || 0);
                 const lucro = calcularLucro(s);
                 return [
                     s.id,
-                    s.descricao,
-                    s.cliente,
-                    formatarData(s.data),
+                    s.descricao.length > 20 ? s.descricao.substring(0, 20) + '...' : s.descricao,
+                    s.cliente.length > 15 ? s.cliente.substring(0, 15) + '...' : s.cliente,
+                    formatarData(s.dataInicio),
+                    s.dataFim ? formatarData(s.dataFim) : 'N/A',
                     formatarMoeda(s.valorServico),
-                    formatarMoeda(s.custoMateriais),
-                    formatarMoeda(s.custoCombustivel),
+                    formatarMoeda(custos),
                     formatarMoeda(lucro),
-                    s.status === 'finalizado' ? 'Finalizado' : s.status === 'em-andamento' ? 'Em Andamento' : 'Cancelado'
+                    s.status === 'finalizado' ? 'Finalizado' : s.status === 'em-andamento' ? 'Em Andamento' : 'Cancelado',
+                    s.statusPagamento === 'pago' ? 'Pago' : s.statusPagamento === 'parcial' ? 'Parcial' : 'Pendente'
                 ];
             });
 
-            doc.text("Relatório de Serviços - ControlServ", 14, 20);
             doc.autoTable({
-                startY: 25,
+                startY: 70,
                 head: [servicosColumns],
                 body: servicosData,
-                didDrawPage: header,
                 styles: { 
                     fontSize: 8,
                     cellPadding: 2,
@@ -1595,52 +2091,181 @@
                     textColor: 255,
                     fontStyle: 'bold'
                 },
-                theme: 'striped'
+                theme: 'grid'
             });
 
-            // Adiciona rodapé
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                footer({ pageNumber: i, settings: { margin: { left: 14 } } });
+            doc.save('Relatorio_Completo_ControlServ.pdf');
+            mostrarNotificacao('Relatório completo gerado com sucesso!', 'sucesso');
+        }
+
+        function gerarRelatorioFinanceiroPDF() {
+            mostrarNotificacao('Gerando relatório financeiro...', 'info');
+
+            if (typeof window.jspdf === 'undefined') {
+                mostrarNotificacao('Erro: Bibliotecas PDF não carregadas.', 'erro');
+                return;
             }
 
-            doc.save('Relatorio_Servicos_ControlServ.pdf');
-            mostrarNotificacao('Relatório PDF gerado com sucesso!', 'sucesso');
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const dataHoraAtual = new Date().toLocaleString('pt-BR');
+
+            // Cabeçalho
+            doc.setFontSize(16);
+            doc.text("RELATÓRIO FINANCEIRO - CONTROLSERV", 20, 20);
+            doc.setFontSize(10);
+            doc.text(`Gerado em: ${dataHoraAtual}`, 20, 30);
+            doc.text("Juniorxam Tecnologia", 20, 35);
+
+            // Cálculos financeiros
+            let metrics = {
+                receitaTotal: 0,
+                custosTotais: 0,
+                lucroTotal: 0,
+                servicosFinalizados: 0,
+                servicosAndamento: 0,
+                pagamentosPendentes: 0,
+                valorPendente: 0
+            };
+
+            servicos.forEach(servico => {
+                metrics.receitaTotal += servico.valorServico || 0;
+                metrics.custosTotais += (servico.custoMateriais || 0) + (servico.custoCombustivel || 0);
+                metrics.lucroTotal += calcularLucro(servico);
+                if (servico.status === 'finalizado') metrics.servicosFinalizados++;
+                if (servico.status === 'em-andamento') metrics.servicosAndamento++;
+                if (servico.statusPagamento !== 'pago') {
+                    metrics.pagamentosPendentes++;
+                    metrics.valorPendente += servico.valorServico || 0;
+                }
+            });
+
+            const margemLucro = metrics.receitaTotal > 0 ? (metrics.lucroTotal / metrics.receitaTotal) * 100 : 0;
+
+            // Métricas financeiras
+            doc.setFontSize(12);
+            doc.text("MÉTRICAS FINANCEIRAS", 20, 50);
+            
+            doc.setFontSize(10);
+            let yPos = 60;
+            doc.text(`Receita Total: ${formatarMoeda(metrics.receitaTotal)}`, 20, yPos);
+            doc.text(`Custos Totais: ${formatarMoeda(metrics.custosTotais)}`, 20, yPos + 6);
+            doc.text(`Lucro Total: ${formatarMoeda(metrics.lucroTotal)}`, 20, yPos + 12);
+            doc.text(`Margem de Lucro: ${margemLucro.toFixed(1)}%`, 20, yPos + 18);
+            doc.text(`Pagamentos Pendentes: ${metrics.pagamentosPendentes}`, 20, yPos + 24);
+            doc.text(`Valor Pendente: ${formatarMoeda(metrics.valorPendente)}`, 20, yPos + 30);
+
+            // Serviços mais lucrativos
+            const servicosLucrativos = [...servicos]
+                .sort((a, b) => calcularLucro(b) - calcularLucro(a))
+                .slice(0, 5);
+
+            doc.setFontSize(12);
+            doc.text("SERVIÇOS MAIS LUCRATIVOS", 20, 110);
+
+            let lucYPos = 120;
+            servicosLucrativos.forEach((servico, index) => {
+                const lucro = calcularLucro(servico);
+                doc.setFontSize(9);
+                doc.text(`${index + 1}. ${servico.descricao}`, 20, lucYPos);
+                doc.text(`${formatarMoeda(lucro)}`, 180, lucYPos, { align: "right" });
+                lucYPos += 5;
+            });
+
+            doc.save('Relatorio_Financeiro_ControlServ.pdf');
+            mostrarNotificacao('Relatório financeiro gerado com sucesso!', 'sucesso');
+        }
+
+        function gerarRelatorioPeriodoPDF() {
+            const dataInicio = document.getElementById('dataInicioRelatorio').value;
+            const dataFim = document.getElementById('dataFimRelatorio').value;
+
+            if (!dataInicio || !dataFim) {
+                mostrarNotificacao('Selecione as datas de início e fim do período.', 'erro');
+                return;
+            }
+
+            const servicosPeriodo = servicos.filter(servico => {
+                const dataServico = new Date(servico.dataInicio);
+                const inicio = new Date(dataInicio);
+                const fim = new Date(dataFim);
+                return dataServico >= inicio && dataServico <= fim;
+            });
+
+            if (servicosPeriodo.length === 0) {
+                mostrarNotificacao('Nenhum serviço encontrado no período selecionado.', 'info');
+                return;
+            }
+
+            mostrarNotificacao(`Gerando relatório do período... (${servicosPeriodo.length} serviços)`, 'info');
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4');
+            const dataHoraAtual = new Date().toLocaleString('pt-BR');
+
+            doc.setFontSize(16);
+            doc.text(`RELATÓRIO DO PERÍODO - CONTROLSERV`, 20, 20);
+            doc.setFontSize(10);
+            doc.text(`Período: ${formatarData(dataInicio)} à ${formatarData(dataFim)}`, 20, 30);
+            doc.text(`Gerado em: ${dataHoraAtual}`, 250, 20, { align: "right" });
+            doc.text("Juniorxam Tecnologia", 250, 25, { align: "right" });
+
+            // Tabela de serviços do período
+            const servicosColumns = ["Descrição", "Cliente", "Data", "Valor", "Lucro", "Status", "Pagamento"];
+            const servicosData = servicosPeriodo.map(s => {
+                const lucro = calcularLucro(s);
+                return [
+                    s.descricao.length > 25 ? s.descricao.substring(0, 25) + '...' : s.descricao,
+                    s.cliente.length > 15 ? s.cliente.substring(0, 15) + '...' : s.cliente,
+                    formatarData(s.dataInicio),
+                    formatarMoeda(s.valorServico),
+                    formatarMoeda(lucro),
+                    s.status === 'finalizado' ? 'Finalizado' : s.status === 'em-andamento' ? 'Em Andamento' : 'Cancelado',
+                    s.statusPagamento === 'pago' ? 'Pago' : s.statusPagamento === 'parcial' ? 'Parcial' : 'Pendente'
+                ];
+            });
+
+            doc.autoTable({
+                startY: 40,
+                head: [servicosColumns],
+                body: servicosData,
+                styles: { fontSize: 8 },
+                headStyles: { fillColor: [16, 185, 129], textColor: 255 }
+            });
+
+            doc.save(`Relatorio_Periodo_${dataInicio}_a_${dataFim}.pdf`);
+            mostrarNotificacao('Relatório do período gerado com sucesso!', 'sucesso');
         }
 
         function gerarRelatorioCSV() {
             mostrarNotificacao('Exportando dados para CSV...', 'info');
             
             const headers = [
-                "ID",
-                "Descrição",
-                "Cliente", 
-                "Data",
-                "Valor Serviço",
-                "Custo Materiais",
-                "Custo Combustível",
-                "Lucro",
-                "Status",
-                "Observações"
+                "ID", "Descrição", "Cliente", "Telefone", "Data Início", "Data Fim", 
+                "Duração (dias)", "Valor Serviço", "Custo Materiais", "Custo Combustível", 
+                "Lucro", "Status", "Status Pagamento", "Observações"
             ];
             
             let csvContent = headers.join(";") + "\n";
 
             servicos.forEach(servico => {
                 const lucro = calcularLucro(servico);
-                const formatNum = (val) => (parseFloat(val) || 0).toFixed(2).replace('.', ',');
+                const duracao = servico.duracaoDias || calcularDuracaoDias(servico.dataInicio, servico.dataFim);
 
                 const row = [
                     servico.id,
                     `"${servico.descricao}"`,
                     `"${servico.cliente}"`,
-                    formatarData(servico.data),
-                    formatNum(servico.valorServico),
-                    formatNum(servico.custoMateriais),
-                    formatNum(servico.custoCombustivel),
-                    formatNum(lucro),
+                    `"${servico.telefone || ''}"`,
+                    formatarData(servico.dataInicio),
+                    servico.dataFim ? formatarData(servico.dataFim) : '',
+                    duracao,
+                    (servico.valorServico || 0).toFixed(2).replace('.', ','),
+                    (servico.custoMateriais || 0).toFixed(2).replace('.', ','),
+                    (servico.custoCombustivel || 0).toFixed(2).replace('.', ','),
+                    lucro.toFixed(2).replace('.', ','),
                     servico.status === 'finalizado' ? 'Finalizado' : servico.status === 'em-andamento' ? 'Em Andamento' : 'Cancelado',
+                    servico.statusPagamento === 'pago' ? 'Pago' : servico.statusPagamento === 'parcial' ? 'Parcial' : 'Pendente',
                     `"${servico.observacao || ''}"`
                 ];
                 csvContent += row.join(";") + "\n";
@@ -1729,11 +2354,15 @@
                     id: 1001,
                     descricao: "Instalação de Câmeras de Segurança",
                     cliente: "João Silva",
-                    data: dataHoje,
+                    telefone: "11999999999",
+                    dataInicio: dataHoje,
+                    dataFim: dataHoje,
+                    duracaoDias: 1,
                     valorServico: 1200.00,
                     custoMateriais: 450.00,
                     custoCombustivel: 35.00,
                     status: "finalizado",
+                    statusPagamento: "pago",
                     observacao: "4 câmeras instaladas na residência",
                     dataCadastro: dataHoje
                 },
@@ -1741,11 +2370,15 @@
                     id: 1002,
                     descricao: "Instalação de Cerca Elétrica",
                     cliente: "Maria Oliveira",
-                    data: dataHoje,
+                    telefone: "11988888888",
+                    dataInicio: dataHoje,
+                    dataFim: '2024-03-20',
+                    duracaoDias: 3,
                     valorServico: 800.00,
                     custoMateriais: 280.00,
                     custoCombustivel: 25.00,
                     status: "em-andamento",
+                    statusPagamento: "pendente",
                     observacao: "50 metros de cerca - finalizar amanhã",
                     dataCadastro: dataHoje
                 },
@@ -1753,11 +2386,15 @@
                     id: 1003,
                     descricao: "Manutenção de Portão Eletrônico",
                     cliente: "Carlos Souza",
-                    data: '2024-02-15',
+                    telefone: "11977777777",
+                    dataInicio: '2024-02-15',
+                    dataFim: '2024-02-15',
+                    duracaoDias: 1,
                     valorServico: 350.00,
                     custoMateriais: 120.00,
                     custoCombustivel: 20.00,
                     status: "finalizado",
+                    statusPagamento: "pago",
                     observacao: "Troca de motor do portão",
                     dataCadastro: '2024-02-15'
                 }
@@ -1775,7 +2412,9 @@
         function checkInitializers() {
             carregarServicos();
             atualizarDashboard();
-            document.getElementById('dataServico').value = obterDataHojeISO();
+            document.getElementById('dataInicio').value = obterDataHojeISO();
+            document.getElementById('duracaoDias').value = 1;
+            calcularDataFim();
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -1784,6 +2423,12 @@
             
             // Mostra loading inicial do Drive
             showLoading('Carregando Google Drive...');
+            
+            // Configura data mínima para os date inputs
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelectorAll('input[type="date"]').forEach(input => {
+                input.min = today;
+            });
         });
     </script>
 </body>
