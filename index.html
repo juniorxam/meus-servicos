@@ -966,6 +966,16 @@
         let initializersRan = false;
 
         // ========================================
+        // FUNÇÃO AUXILIAR PARA DATA/HORA FORMATADA
+        // ========================================
+        function obterDataHoraFormatada() {
+            const now = new Date();
+            const dateString = now.toISOString().split('T')[0].replace(/-/g, '_');
+            const timeString = now.toTimeString().split(' ')[0].replace(/:/g, 'h');
+            return `${dateString}_${timeString}`;
+        }
+
+        // ========================================
         // FUNÇÕES BÁSICAS
         // ========================================
         function salvarDados() {
@@ -1596,6 +1606,22 @@
             return metrics;
         }
 
+        // Função auxiliar para calcular formas de pagamento
+        function calcularFormasPagamento(servicosFiltrados) {
+            const formas = {};
+            
+            servicosFiltrados.forEach(servico => {
+                if (servico.formaPagamento) {
+                    formas[servico.formaPagamento] = (formas[servico.formaPagamento] || 0) + 1;
+                }
+            });
+            
+            // Ordenar por quantidade (decrescente)
+            return Object.fromEntries(
+                Object.entries(formas).sort(([,a], [,b]) => b - a)
+            );
+        }
+
         // Função para gerar relatório completo melhorado
         function gerarRelatorioCompletoPDF() {
             const dataInicio = document.getElementById('dataInicioRelatorioCompleto').value;
@@ -1620,7 +1646,7 @@
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('l', 'mm', 'a4');
-            const dataHoraAtual = new Date().toLocaleString('pt-BR');
+            const dataHoraGeracao = new Date().toLocaleString('pt-BR');
             const metrics = calcularMetricasAvancadas(servicosFiltrados);
 
             // Cabeçalho
@@ -1631,7 +1657,7 @@
             doc.setFontSize(10);
             doc.setTextColor(100);
             doc.text(`Período: ${dataInicio ? formatarData(dataInicio) + ' a ' + formatarData(dataFim) : 'Todos os períodos'}`, 20, 30);
-            doc.text(`Gerado em: ${dataHoraAtual}`, 250, 20, { align: "right" });
+            doc.text(`Gerado em: ${dataHoraGeracao}`, 250, 20, { align: "right" });
             doc.text("Juniorxam Tecnologia", 250, 25, { align: "right" });
 
             // Métricas Principais
@@ -1659,12 +1685,23 @@
             // Tabela de Serviços
             const servicosColumns = [
                 "ID", "Descrição", "Cliente", "Início", "Fim", 
-                "Valor", "Custos", "Lucro", "Status", "Pagamento"
+                "Valor", "Custos", "Lucro", "Status", "Pagamento", "Forma Pagamento"
             ];
             
             const servicosData = servicosFiltrados.map(s => {
                 const custos = (s.custoMateriais || 0) + (s.custoCombustivel || 0);
                 const lucro = calcularLucro(s);
+                
+                const formaPagamentoText = {
+                    'dinheiro': 'Dinheiro',
+                    'pix': 'PIX',
+                    'cartao-debito': 'Cartão Débito',
+                    'cartao-credito': 'Cartão Crédito',
+                    'transferencia': 'Transferência',
+                    'boleto': 'Boleto',
+                    'outro': 'Outro'
+                }[s.formaPagamento] || '';
+
                 return [
                     s.id,
                     s.descricao.length > 20 ? s.descricao.substring(0, 20) + '...' : s.descricao,
@@ -1675,7 +1712,8 @@
                     formatarMoeda(custos),
                     formatarMoeda(lucro),
                     s.status === 'finalizado' ? 'Finalizado' : s.status === 'em-andamento' ? 'Em Andamento' : 'Cancelado',
-                    s.statusPagamento === 'pago' ? 'Pago' : s.statusPagamento === 'parcial' ? 'Parcial' : 'Pendente'
+                    s.statusPagamento === 'pago' ? 'Pago' : s.statusPagamento === 'parcial' ? 'Parcial' : 'Pendente',
+                    formaPagamentoText
                 ];
             });
 
@@ -1692,23 +1730,47 @@
                     textColor: 255,
                     fontStyle: 'bold'
                 },
-                theme: 'grid'
+                theme: 'grid',
+                margin: { top: 75 }
             });
 
             // Análise de Performance
             const finalY = doc.lastAutoTable.finalY + 10;
-            doc.setFontSize(12);
-            doc.text("ANÁLISE DE PERFORMANCE", 20, finalY);
+            if (finalY < 280) { // Verifica se ainda tem espaço na página
+                doc.setFontSize(12);
+                doc.text("ANÁLISE DE PERFORMANCE", 20, finalY);
 
-            doc.setFontSize(9);
-            doc.text(`Maior Lucro: ${formatarMoeda(metrics.maiorLucro)}`, 20, finalY + 8);
-            doc.text(`Menor Lucro: ${formatarMoeda(metrics.menorLucro)}`, 20, finalY + 16);
-            doc.text(`Valor Total Recebido: ${formatarMoeda(metrics.valorRecebido)}`, 20, finalY + 24);
-            doc.text(`Eficiência Operacional: ${metrics.taxaConversao.toFixed(1)}%`, 20, finalY + 32);
+                doc.setFontSize(9);
+                doc.text(`Maior Lucro: ${formatarMoeda(metrics.maiorLucro)}`, 20, finalY + 8);
+                doc.text(`Menor Lucro: ${formatarMoeda(metrics.menorLucro)}`, 20, finalY + 16);
+                doc.text(`Valor Total Recebido: ${formatarMoeda(metrics.valorRecebido)}`, 20, finalY + 24);
+                doc.text(`Eficiência Operacional: ${metrics.taxaConversao.toFixed(1)}%`, 20, finalY + 32);
+                
+                // Adicionar informações sobre formas de pagamento
+                const formasPagamento = calcularFormasPagamento(servicosFiltrados);
+                doc.text(`Formas de Pagamento Mais Usadas:`, 20, finalY + 44);
+                
+                let formasY = finalY + 52;
+                Object.entries(formasPagamento).slice(0, 3).forEach(([forma, quantidade]) => {
+                    const formaText = {
+                        'dinheiro': 'Dinheiro',
+                        'pix': 'PIX',
+                        'cartao-debito': 'Cartão Débito',
+                        'cartao-credito': 'Cartão Crédito',
+                        'transferencia': 'Transferência',
+                        'boleto': 'Boleto',
+                        'outro': 'Outro'
+                    }[forma] || forma;
+                    
+                    doc.text(`• ${formaText}: ${quantidade} serviços`, 25, formasY);
+                    formasY += 6;
+                });
+            }
 
+            // Nome do arquivo com data/hora de geração
             const fileName = dataInicio ? 
-                `Relatorio_Completo_${dataInicio}_a_${dataFim}.pdf` : 
-                'Relatorio_Completo_Geral.pdf';
+                `Relatorio_Completo_${dataInicio}_a_${dataFim}_${obterDataHoraFormatada()}.pdf` : 
+                `Relatorio_Completo_Geral_${obterDataHoraFormatada()}.pdf`;
 
             doc.save(fileName);
             mostrarNotificacao('Relatório completo gerado com sucesso!', 'sucesso');
@@ -1938,9 +2000,7 @@
             const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             
-            const now = new Date();
-            const dateString = now.toISOString().split('T')[0].replace(/-/g, '_');
-            const exportFileDefaultName = `Relatorio_Servicos_${dateString}.csv`;
+            const exportFileDefaultName = `Relatorio_Servicos_${obterDataHoraFormatada()}.csv`;
 
             const linkElement = document.createElement('a');
             linkElement.setAttribute('href', url);
@@ -1961,9 +2021,7 @@
             
             const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonString);
             
-            const now = new Date();
-            const dateString = now.toISOString().split('T')[0].replace(/-/g, '_');
-            const exportFileDefaultName = `backup_servicos_${dateString}.json`;
+            const exportFileDefaultName = `backup_servicos_${obterDataHoraFormatada()}.json`;
 
             let linkElement = document.createElement('a');
             linkElement.setAttribute('href', dataUri);
