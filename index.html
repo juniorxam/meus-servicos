@@ -2,8 +2,19 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>ControlServ - Gestão de Serviços</title>
+    
+    <!-- PWA Meta Tags ESSENCIAIS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#10b981">
+
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- CSS e Scripts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -727,12 +738,6 @@
     <!-- Scripts do Google com tratamento de erro -->
     <script src="https://accounts.google.com/gsi/client" async defer onerror="gapiLoadError()"></script>
     <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" onerror="gapiLoadError()" async defer></script>
-    
-    <meta name="theme-color" content="#10b981">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="./manifest.json" crossorigin="use-credentials">
 </head>
 <body>
     <!-- Loading do Google Drive -->
@@ -1072,7 +1077,7 @@
             e.preventDefault();
             deferredPrompt = e;
             installButton.style.display = 'block';
-            btnInstalarApp.style.display = 'block';
+            if (btnInstalarApp) btnInstalarApp.style.display = 'block';
             
             installButton.addEventListener('click', async () => {
                 installButton.style.display = 'none';
@@ -1087,7 +1092,7 @@
 
         window.addEventListener('appinstalled', () => {
             installButton.style.display = 'none';
-            btnInstalarApp.style.display = 'none';
+            if (btnInstalarApp) btnInstalarApp.style.display = 'none';
             deferredPrompt = null;
         });
 
@@ -1446,7 +1451,7 @@
                 mostrarNotificacao('Erro ao listar arquivos do Drive', 'erro');
             }
         }
-        
+
         // ========================================
         // FUNÇÕES BÁSICAS
         // ========================================
@@ -1486,7 +1491,13 @@
         function formatarTelefone(telefone) {
             if (!telefone) return 'N/A';
             // Formatação simples de telefone
-            return telefone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            const cleaned = telefone.replace(/\D/g, '');
+            if (cleaned.length === 11) {
+                return cleaned.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            } else if (cleaned.length === 10) {
+                return cleaned.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+            }
+            return telefone;
         }
         
         function obterDataHojeISO() {
@@ -2406,6 +2417,46 @@
             mostrarNotificacao('Dados de exemplo criados com sucesso!', 'sucesso');
         }
         
+        // ========================================
+        // PWA - SERVICE WORKER
+        // ========================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // Tenta registrar o service worker
+                navigator.serviceWorker.register('sw.js')
+                    .then(function(registration) {
+                        console.log('✅ Service Worker registrado:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('❌ Service Worker falhou:', error);
+                        // Não impede o funcionamento do app
+                    });
+            });
+        }
+
+        // Detectar se está como PWA
+        function isPWA() {
+            return window.matchMedia('(display-mode: standalone)').matches || 
+                   window.navigator.standalone === true;
+        }
+
+        // Ajustes para PWA
+        if (isPWA()) {
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('📱 Rodando como PWA instalado');
+                // Pequenos ajustes visuais para PWA
+                document.body.style.paddingTop = '70px';
+            });
+        }
+
+        // Prevenir problemas de zoom no mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            let viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport) {
+                viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+            }
+        });
+
         // ========================================
         // INICIALIZAÇÃO
         // ========================================
