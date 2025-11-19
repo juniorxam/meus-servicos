@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ControlServ - Gestão de Serviços</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    
+    <script src="https://accounts.google.com/gsi/client" async defer></script> 
+    <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script> 
+    
+    <meta name="theme-color" content="#10b981">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="./manifest.json">
+
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #0da271;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            color: #1f2937;
+            min-height: 100vh;
+            padding-top: 100px;
+            position: relative;
+            padding-bottom: 60px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            z-index: 999;
+            padding: 0 8px;
+        }
+
+        .tab {
+            padding: 12px 15px;
+            cursor: pointer;
+            background: transparent;
+            flex: 1;
+            text-align: center;
+            color: #6b7280;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            border-bottom: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .tab.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            text-align: center;
+            border-top: 4px solid var(--primary);
+        }
+
+        .metric-card h3 {
+            margin: 0 0 8px 0;
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-height: 30px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .metric-card .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 13px;
+        }
+
+        input, select, button, textarea {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1.5px solid #e5e7eb;
+            font-size: 14px;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+        }
+        
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .servicos-lista, #listaServicos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .servico-card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .servico-card.finalizado {
+            border-left-color: var(--success);
+            opacity: 0.8;
+        }
+
+        .servico-card.em-andamento {
+            border-left-color: var(--warning);
+        }
+
+        .servico-card.cancelado {
+            border-left-color: var(--danger);
+            opacity: 0.8;
+        }
+
+        .vencimento-item {
+            background: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            border-left: 4px solid var(--warning);
+        }
+
+        .vencimento-item.atrasado { border-left-color: var(--danger); }
+        .vencimento-item.pago { border-left-color: var(--success); opacity: 0.8; }
+
+        .notificacao {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 14px 24px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 1001;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .notificacao.sucesso { background: var(--success); }
+        .notificacao.erro { background: var(--danger); }
+        .notificacao.info { background: var(--info); }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #1f2937;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+
+        .info-box {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+
+        .info-box.warning {
+            background: #fffbeb;
+            border-color: #fed7aa;
+        }
+        
+        .info-box.tips {
+            background: #ecfdf5;
+            border-color: #a7f3d0;
+            border-left: 4px solid var(--success);
+            margin-top: 30px; 
+        }
+
+        .modal {
+            position: fixed;
+            z-index: 1002;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 90%; 
+            width: 600px; 
+            max-height: 90vh; 
+            overflow-y: auto;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #confirmEditModal .modal-content {
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .servico-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--warning);
+            font-size: 14px;
+        }
+
+        .servico-item.finalizado { border-left-color: var(--success); opacity: 0.8; }
+        .servico-item.cancelado { border-left-color: var(--danger); }
+        
+        .dashboard-layout {
+            display: flex;
+            gap: 20px;
+            flex-direction: column; 
+            min-height: calc(100vh - 100px - 60px - 30px);
+        }
+        
+        .dashboard-main {
+            flex: 2;
+            min-width: 0;
+        }
+
+        .dashboard-sidebar {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #listaServicosRecentes {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .servicos-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .servicos-col-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .servicos-col-list .card {
+            flex-grow: 1;
+        }
+
+        .servicos-col-list #listaServicos {
+            overflow-y: auto;
+            max-height: calc(100vh - 350px);
+            padding-right: 5px;
+        }
+
+        @media (min-width: 1024px) {
+            .dashboard-layout {
+                flex-direction: row;
+            }
+
+            .servicos-layout {
+                grid-template-columns: 1.2fr 2fr;
+            }
+
+            .servicos-col-list #listaServicos {
+                max-height: calc(100vh - 300px);
+            }
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr; 
+            gap: 15px 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .form-grid.grid-2-cols {
+                grid-template-columns: 1fr 1fr; 
+            }
+        }
+        
+        .form-grid .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        #installButton {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            z-index: 10000;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .lucro-positivo { color: var(--success); font-weight: 700; }
+        .lucro-negativo { color: var(--danger); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <button id="installButton" style="display: none;">
+        <i class="fas fa-download"></i> INSTALAR APP
+    </button>
+
+    <header>
+        <i class="fas fa-tools"></i>
+        ControlServ - Gestão de Serviços
+    </header>
+
+    <div class="tabs">
+        <div class="tab active" onclick="abrirTab('dashboard')">
+            <i class="fas fa-chart-line"></i>
+            <span>Dashboard</span>
+        </div>
+        <div class="tab" onclick="abrirTab('servicos')">
+            <i class="fas fa-concierge-bell"></i>
+            <span>Serviços</span>
+        </div>
+        <div class="tab" onclick="abrirTab('relatorios')">
+            <i class="fas fa-file-alt"></i>
+            <span>Relatórios</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="dashboard" class="tab-content active">
+            <div class="dashboard-layout">
+                <div class="dashboard-main">
+                    <div class="card">
+                        <h2><i class="fas fa-tachometer-alt"></i> Resumo Financeiro</h2>
+                        <div class="summary-grid" id="dashboardGrid">
+                            </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-sidebar">
+                    <div class="card">
+                        <h3><i class="fas fa-history"></i> Serviços Recentes</h3>
+                        <div id="listaServicosRecentes">
+                            </div>
+                    </div>
+                    <div class="info-box warning">
+                        <i class="fas fa-lightbulb"></i>
+                        <strong>Dica:</strong> Registre todos os custos para calcular o lucro real dos serviços.
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="servicos" class="tab-content">
+            <div class="info-box warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Importante:</strong> Preencha todos os valores para calcular corretamente o lucro do serviço.
+            </div>
+            
+            <div class="servicos-layout">
+                <div class="servicos-col-form">
+                    <div class="card">
+                        <h2 id="servicoFormTitle"><i class="fas fa-plus-circle"></i> Novo Serviço</h2>
+                        
+                        <div class="form-grid grid-2-cols">
+                            <div class="form-group full-width">
+                                <label for="descricaoServico">Descrição do Serviço:</label>
+                                <input type="text" id="descricaoServico" placeholder="Ex: Instalação de câmeras, cerca elétrica..." required>
+                            </div>
+                            <div class="form-group">
+                                <label for="clienteServico">Cliente:</label>
+                                <input type="text" id="clienteServico" placeholder="Nome do cliente" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="dataServico">Data do Serviço:</label>
+                                <input type="date" id="dataServico" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="valorServico">Valor do Serviço (R$):</label>
+                                <input type="number" id="valorServico" step="0.01" min="0" placeholder="1000.00" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="custoMateriais">Custo com Materiais (R$):</label>
+                                <input type="number" id="custoMateriais" step="0.01" min="0" placeholder="300.00" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="custoCombustivel">Custo com Combustível (R$):</label>
+                                <input type="number" id="custoCombustivel" step="0.01" min="0" placeholder="50.00" required>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="statusServico">Status do Serviço:</label>
+                                <select id="statusServico" required>
+                                    <option value="em-andamento">Em Andamento</option>
+                                    <option value="finalizado">Finalizado</option>
+                                    <option value="cancelado">Cancelado</option>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="observacaoServico">Observações:</label>
+                                <textarea id="observacaoServico" placeholder="Detalhes do serviço, endereço, etc..." rows="3"></textarea>
+                            </div>
+                            <input type="hidden" id="servicoIdEdicao">
+                        </div>
+
+                        <div id="previewServico" style="background: #f8fafc; padding: 15px; border-radius: 8px; margin: 15px 0; display: none;">
+                            <h4><i class="fas fa-calculator"></i> Resumo do Serviço</h4>
+                            <div id="detalhesPreview"></div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button id="btnCadastrarServico" onclick="adicionarServico()">
+                                <i class="fas fa-check-circle"></i> Cadastrar Serviço
+                            </button>
+                            <button id="btnSalvarEdicao" onclick="salvarEdicaoServico()" style="display: none;">
+                                <i class="fas fa-save"></i> Salvar Edição
+                            </button>
+                            <button id="btnCancelarEdicao" onclick="limparFormularioServico(true)" style="background: var(--danger); display: none;">
+                                <i class="fas fa-times-circle"></i> Cancelar Edição
+                            </button>
+                            <button onclick="limparFormularioServico()" style="background: #6b7280;">
+                                <i class="fas fa-broom"></i> Limpar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="servicos-col-list">
+                    <div class="card">
+                        <h2><i class="fas fa-list"></i> Serviços Cadastrados</h2>
+                        <div class="form-group">
+                            <label for="filtroServicos">Filtrar por Cliente ou Status:</label>
+                            <input type="text" id="filtroServicos" oninput="filtrarServicos()" placeholder="Nome do cliente ou status">
+                        </div>
+                        <div id="listaServicos">
+                            </div>
+                    </div>
+                    <div class="info-box tips">
+                        <p><strong>💡 Dicas de Uso:</strong></p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>Registre TODOS os custos para cálculo preciso do lucro.</li>
+                            <li>Atualize o status quando finalizar um serviço.</li>
+                            <li>Use a aba Relatórios para análises detalhadas.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="relatorios" class="tab-content">
+            <div class="config-grid">
+                <div class="card" style="border-left-color: var(--danger);">
+                    <h2><i class="fas fa-file-pdf"></i> Geração de Relatórios</h2>
+                    <p>Gere relatórios detalhados para análise financeira e controle de serviços.</p>
+                    <div class="action-buttons" style="flex-direction: column;">
+                        <button onclick="gerarRelatorioPDF()" style="background: var(--danger);">
+                            <i class="fas fa-file-pdf"></i> Relatório Completo (PDF)
+                        </button>
+                        <button onclick="gerarRelatorioCSV()" style="background: var(--success);">
+                            <i class="fas fa-file-excel"></i> Exportar Dados (CSV para Excel)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card" style="border-left-color: var(--info);">
+                    <h2><i class="fab fa-google-drive"></i> Backup no Google Drive</h2>
+                    <p>Faça backup ou restaure seus dados de serviços diretamente do seu Google Drive.</p>
+                    <div class="action-buttons" style="flex-direction: column;">
+                        <button id="btnSalvarDrive" onclick="salvarBackupDrive()" style="background: var(--info);">
+                            <i class="fas fa-cloud-upload-alt"></i> Salvar Backup no Drive
+                        </button>
+                        <button id="btnCarregarDrive" onclick="carregarBackupDrive()" style="background: var(--warning);">
+                            <i class="fas fa-cloud-download-alt"></i> Carregar Backup do Drive
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card" style="border-left-color: var(--info);">
+                    <h2><i class="fas fa-upload"></i> Importar Dados (JSON)</h2>
+                    <p>Importe dados de backup no formato JSON para restaurar informações.</p>
+                    <div class="form-group">
+                        <label for="arquivoBackup">Selecione o arquivo de backup (.json):</label>
+                        <input type="file" id="arquivoBackup" accept=".json">
+                    </div>
+                    <div class="action-buttons">
+                        <button onclick="importarDados()" style="background: var(--info);">
+                            <i class="fas fa-upload"></i> Carregar Dados do Arquivo
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card" style="border-left-color: var(--primary);">
+                    <h2><i class="fas fa-database"></i> Gerenciar e Exportar Dados</h2>
+                    <p>Faça backup dos dados ou gere dados de exemplo para testar o sistema.</p>
+                    <div class="action-buttons" style="flex-direction: column;">
+                        <button onclick="exportarDados()" style="background: var(--primary);">
+                            <i class="fas fa-download"></i> Exportar Backup (JSON)
+                        </button>
+                        <button onclick="criarDadosExemplo()" style="background: var(--warning);">
+                            <i class="fas fa-plus"></i> Criar Dados de Exemplo
+                        </button>
+                        <button onclick="limparDados()" style="background: var(--danger);">
+                            <i class="fas fa-trash"></i> Limpar Todos os Dados
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notificacao" class="notificacao"></div>
+
+    <div class="footer">
+        Desenvolvido por <strong>ControlServ</strong> - Gestão de Serviços v1.0
+    </div>
+    
+    <div id="editModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-button" onclick="fecharModalEdicao()">&times;</span>
+            <h3 style="color: var(--primary); margin-bottom: 20px;"><i class="fas fa-edit"></i> Editar Serviço</h3>
+
+            <div id="modalDetalhesServico" style="margin-bottom: 20px; padding: 10px; background: #f0f9ff; border-radius: 8px;">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // SISTEMA DE INSTALAÇÃO PWA
+        // ========================================
+        let deferredPrompt;
+        const installButton = document.getElementById('installButton');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installButton.style.display = 'block';
+            
+            installButton.addEventListener('click', async () => {
+                installButton.style.display = 'none';
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    mostrarNotificacao('App instalado com sucesso!', 'sucesso');
+                }
+                deferredPrompt = null;
+            });
+        });
+
+        window.addEventListener('appinstalled', () => {
+            installButton.style.display = 'none';
+            deferredPrompt = null;
+        });
+
+        // ========================================
+        // SISTEMA DE DADOS
+        // ========================================
+        let servicos = JSON.parse(localStorage.getItem("servicos")) || [];
+        let initializersRan = false;
+
+        // ========================================
+        // GOOGLE DRIVE CONFIGURAÇÃO E FUNÇÕES
+        // ========================================
+        // CLIENT_ID (do contexto anterior) e API_KEY (fornecida agora)
+        const CLIENT_ID = "848934032636-f2amcpeotokq8vnbid2j5vhbgfpglins.apps.googleusercontent.com"; 
+        const API_KEY = "AIzaSyA3cbSpxa0UC3o8aTdw2VYHUaMGFUiBqp8"; // Sua API Key
+        const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file'; // Permissão para gerenciar arquivos criados pelo app.
+        const BACKUP_FILE_NAME = 'ControlServ_Backup.json';
+
+        let tokenClient;
+        let gapiInited = false;
+        let gisInited = false;
+        let fileId = null; // Armazena o ID do arquivo de backup, se encontrado
+
+        // 1. Chamado pelo 'onload' do script api.js (no HTML)
+        function gapiLoaded() {
+            gapi.load('client', initializeGapiClient);
+        }
+
+        // 2. Inicializa o cliente GAPI
+        async function initializeGapiClient() {
+            try {
+                await gapi.client.init({
+                    apiKey: API_KEY,
+                    discoveryDocs: DISCOVERY_DOCS,
+                });
+                gapiInited = true;
+                console.log('GAPI Client inicializado.');
+                gisLoaded(); 
+            } catch (error) {
+                console.error('Erro ao inicializar gapi.client:', error);
+                mostrarNotificacao('Erro ao carregar a API do Drive. Verifique a API Key e as credenciais.', 'erro');
+            }
+        }
+
+        // 3. Inicializa o Google Identity Services (GIS)
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: '', 
+                prompt: 'consent'
+            });
+            gisInited = true;
+            console.log('GIS inicializado. Pronto para solicitar token.');
+        }
+        
+        async function searchBackupFile() {
+            try {
+                const response = await gapi.client.drive.files.list({
+                    q: `name='${BACKUP_FILE_NAME}' and trashed=false`,
+                    fields: 'files(id, name)',
+                    spaces: 'drive',
+                    pageSize: 1
+                });
+
+                if (response.result.files && response.result.files.length > 0) {
+                    fileId = response.result.files[0].id;
+                    mostrarNotificacao(`Arquivo de backup encontrado no Drive.`, 'info');
+                    return true;
+                } else {
+                    fileId = null;
+                    mostrarNotificacao('Arquivo de backup não encontrado no Drive. Será criado um novo.', 'info');
+                    return false;
+                }
+            } catch (error) {
+                // Se houver erro, provavelmente o token expirou ou não há autorização ativa
+                console.error('Erro ao buscar arquivo no Drive:', error);
+                return false; 
+            }
+        }
+        
+        function salvarBackupDrive() {
+            if (!gapiInited || !gisInited) {
+                mostrarNotificacao('Aguarde a inicialização das bibliotecas do Google Drive.', 'erro');
+                return;
+            }
+
+            tokenClient.callback = async (resp) => {
+                if (resp.error !== undefined) {
+                    mostrarNotificacao('Autorização do Drive negada ou erro.', 'erro');
+                    return;
+                }
+
+                mostrarNotificacao('Autorização concedida. Buscando arquivo...', 'info');
+
+                try {
+                    // Prepara os dados
+                    const dados = { servicos: servicos };
+                    const jsonString = JSON.stringify(dados, null, 2);
+                    const fileContent = new Blob([jsonString], { type: 'application/json' });
+                    
+                    let isUpdate = await searchBackupFile(); 
+
+                    const metadata = {
+                        'name': BACKUP_FILE_NAME,
+                        'mimeType': 'application/json'
+                    };
+
+                    let request;
+                    const boundary = 'foo_bar_baz'; // Definir um boundary
+
+                    if (isUpdate && fileId) {
+                        // ATUALIZAR (PATCH)
+                        mostrarNotificacao(`Atualizando arquivo existente (ID: ${fileId})...`, 'info');
+                        
+                        const form = new FormData();
+                        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                        form.append('file', fileContent);
+                        
+                        request = gapi.client.request({
+                            path: '/upload/drive/v3/files/' + fileId,
+                            method: 'PATCH',
+                            params: { uploadType: 'multipart' },
+                            // gapi.client.request automaticamente lida com o boundary do FormData
+                            body: form 
+                        });
+
+                    } else {
+                        // CRIAR NOVO (POST)
+                        mostrarNotificacao('Criando novo arquivo de backup...', 'info');
+                        
+                        // Formata a requisição multipart/related
+                        const form = new FormData();
+                        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                        form.append('file', fileContent);
+                        
+                        request = gapi.client.request({
+                            path: '/upload/drive/v3/files',
+                            method: 'POST',
+                            params: { uploadType: 'multipart' },
+                            body: form
+                        });
+                    }
+                    
+                    const response = await request;
+                    
+                    fileId = response.result.id;
+                    mostrarNotificacao('Backup salvo com sucesso no Google Drive!', 'sucesso');
+
+                } catch (e) {
+                    console.error('Erro no upload para o Drive:', e);
+                    mostrarNotificacao('Erro ao salvar o backup no Google Drive.', 'erro');
+                }
+            };
+
+            // Inicia o fluxo de autorização
+            tokenClient.requestAccessToken();
+        }
+        
+        function carregarBackupDrive() {
+            if (!gapiInited || !gisInited) {
+                mostrarNotificacao('Aguarde a inicialização das bibliotecas do Google Drive.', 'erro');
+                return;
+            }
+
+            tokenClient.callback = async (resp) => {
+                if (resp.error !== undefined) {
+                    mostrarNotificacao('Autorização do Drive negada ou erro.', 'erro');
+                    return;
+                }
+
+                mostrarNotificacao('Autorização concedida. Buscando arquivo...', 'info');
+                
+                try {
+                    let found = await searchBackupFile();
+                    
+                    if (!found || !fileId) {
+                        mostrarNotificacao('Nenhum arquivo de backup encontrado no Drive.', 'erro');
+                        return;
+                    }
+                    
+                    mostrarNotificacao(`Baixando backup (ID: ${fileId})...`, 'info');
+
+                    // Faz o download do conteúdo do arquivo (alt=media)
+                    const response = await gapi.client.drive.files.get({
+                        fileId: fileId,
+                        alt: 'media' 
+                    });
+
+                    if (confirm("ATENÇÃO: A importação irá SOBRESCREVER os dados atuais. Deseja continuar?")) {
+                        const data = response.result;
+                        if (!data.servicos) {
+                             mostrarNotificacao('O arquivo JSON do Drive não está no formato esperado.', 'erro');
+                             return;
+                        }
+                        
+                        servicos = data.servicos;
+                        salvarDados();
+                        checkInitializers();
+                        mostrarNotificacao('Dados carregados com sucesso do Google Drive!', 'sucesso');
+                    }
+
+                } catch (e) {
+                    console.error('Erro no download do Drive:', e);
+                    mostrarNotificacao('Erro ao carregar o backup do Google Drive.', 'erro');
+                }
+            };
+
+            tokenClient.requestAccessToken();
+        }
+        
+        // ========================================
+        // FUNÇÕES BÁSICAS
+        // ========================================
+        function salvarDados() {
+            localStorage.setItem("servicos", JSON.stringify(servicos));
+        }
+
+        function mostrarNotificacao(mensagem, tipo = 'info') {
+            const notificacao = document.getElementById('notificacao');
+            notificacao.textContent = mensagem;
+            notificacao.className = `notificacao ${tipo}`;
+            notificacao.style.display = 'block';
+            
+            setTimeout(() => {
+                notificacao.style.display = 'none';
+            }, 4000);
+        }
+
+        function formatarMoeda(valor) {
+            const num = parseFloat(valor) || 0; 
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(num);
+        }
+
+        function formatarData(data) {
+            if (!data) return 'N/A';
+            try {
+                const dateObj = new Date(data + 'T00:00:00');
+                return dateObj.toLocaleDateString('pt-BR');
+            } catch (e) {
+                return 'Data Inválida';
+            }
+        }
+        
+        function obterDataHojeISO() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        function calcularLucro(servico) {
+            const valorServico = servico.valorServico || 0;
+            const custoMateriais = servico.custoMateriais || 0;
+            const custoCombustivel = servico.custoCombustivel || 0;
+            return valorServico - custoMateriais - custoCombustivel;
+        }
+
+        function abrirTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            
+            const activeTabButton = document.querySelector(`.tabs .tab[onclick*="abrirTab('${tabName}')"]`);
+            if (activeTabButton) {
+                activeTabButton.classList.add('active');
+            }
+            
+            if (tabName === 'servicos') {
+                document.getElementById('dataServico').value = obterDataHojeISO();
+            }
+            
+            if (tabName === 'dashboard') {
+                atualizarDashboard();
+            } else if (tabName === 'servicos') {
+                carregarServicos();
+                limparFormularioServico(true);
+            } else if (tabName === 'relatorios') {
+                // Tenta buscar o arquivo de backup se já tivermos as libs prontas e um token
+                if (gapiInited && gisInited && gapi.client.getToken()) {
+                    searchBackupFile(); 
+                }
+            }
+        }
+
+        // ========================================
+        // FILTROS
+        // ========================================
+        function filtrarServicos() { carregarServicos(); }
+
+        // ========================================
+        // SISTEMA DE SERVIÇOS
+        // ========================================
+        function carregarServicos() {
+            const listaServicos = document.getElementById('listaServicos');
+            const filtro = document.getElementById('filtroServicos').value.toLowerCase();
+            
+            const servicosFiltrados = servicos.filter(servico => 
+                servico.cliente.toLowerCase().includes(filtro) || 
+                servico.status.toLowerCase().includes(filtro) ||
+                servico.descricao.toLowerCase().includes(filtro)
+            );
+
+            if (servicosFiltrados.length === 0) {
+                listaServicos.innerHTML = '<p style="text-align: center; color: #6b7280;">Nenhum serviço encontrado.</p>';
+                return;
+            }
+
+            listaServicos.innerHTML = servicosFiltrados.map(servico => {
+                const lucro = calcularLucro(servico);
+                const statusClass = servico.status;
+                const statusText = {
+                    'em-andamento': 'Em Andamento',
+                    'finalizado': 'Finalizado',
+                    'cancelado': 'Cancelado'
+                }[servico.status] || servico.status;
+
+                return `
+                    <div class="servico-card ${statusClass}" onclick="editarServico(${servico.id})">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                            <h3 style="margin: 0;">${servico.descricao}</h3>
+                            <span style="background: ${servico.status === 'finalizado' ? '#d1fae5' : servico.status === 'cancelado' ? '#fee2e2' : '#fef3c7'}; color: ${servico.status === 'finalizado' ? '#065f46' : servico.status === 'cancelado' ? '#991b1b' : '#92400e'}; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">
+                                ${statusText}
+                            </span>
+                        </div>
+                        <p><strong>👤 Cliente:</strong> ${servico.cliente}</p>
+                        <p><strong>📅 Data:</strong> ${formatarData(servico.data)}</p>
+                        <p><strong>💰 Valor:</strong> ${formatarMoeda(servico.valorServico)}</p>
+                        <p><strong>🔧 Materiais:</strong> ${formatarMoeda(servico.custoMateriais)}</p>
+                        <p><strong>⛽ Combustível:</strong> ${formatarMoeda(servico.custoCombustivel)}</p>
+                        <p><strong>💵 Lucro:</strong> <span class="${lucro >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(lucro)}</span></p>
+                        ${servico.observacao ? `<p><strong>📝 Observações:</strong> ${servico.observacao}</p>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function limparFormularioServico(cancelarEdicao = false) {
+            document.getElementById('descricaoServico').value = '';
+            document.getElementById('clienteServico').value = '';
+            document.getElementById('dataServico').value = obterDataHojeISO();
+            document.getElementById('valorServico').value = '';
+            document.getElementById('custoMateriais').value = '';
+            document.getElementById('custoCombustivel').value = '';
+            document.getElementById('statusServico').value = 'em-andamento';
+            document.getElementById('observacaoServico').value = '';
+            document.getElementById('servicoIdEdicao').value = '';
+            
+            document.getElementById('servicoFormTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Novo Serviço';
+            document.getElementById('btnCadastrarServico').style.display = 'inline-flex';
+            document.getElementById('btnSalvarEdicao').style.display = 'none';
+            document.getElementById('btnCancelarEdicao').style.display = 'none';
+
+            document.getElementById('previewServico').style.display = 'none';
+
+            if (cancelarEdicao) {
+                mostrarNotificacao('Modo de cadastro ativado.', 'info');
+            }
+        }
+        
+        function adicionarServico() {
+            const descricao = document.getElementById('descricaoServico').value.trim();
+            const cliente = document.getElementById('clienteServico').value.trim();
+            const data = document.getElementById('dataServico').value;
+            const valorServico = parseFloat(document.getElementById('valorServico').value) || 0;
+            const custoMateriais = parseFloat(document.getElementById('custoMateriais').value) || 0;
+            const custoCombustivel = parseFloat(document.getElementById('custoCombustivel').value) || 0;
+            const status = document.getElementById('statusServico').value;
+            const observacao = document.getElementById('observacaoServico').value.trim();
+
+            if (!descricao || !cliente || !data || valorServico <= 0) {
+                mostrarNotificacao('Descrição, Cliente, Data e Valor do Serviço são obrigatórios.', 'erro');
+                return;
+            }
+
+            const novoServico = {
+                id: Date.now(),
+                descricao,
+                cliente,
+                data,
+                valorServico,
+                custoMateriais,
+                custoCombustivel,
+                status,
+                observacao,
+                dataCadastro: obterDataHojeISO()
+            };
+
+            servicos.push(novoServico);
+            salvarDados();
+            limparFormularioServico();
+            carregarServicos();
+            atualizarDashboard();
+            mostrarNotificacao(`Serviço "${descricao}" cadastrado com sucesso!`, 'sucesso');
+        }
+
+        function editarServico(id) {
+            const servico = servicos.find(s => s.id === id);
+            if (!servico) {
+                mostrarNotificacao('Serviço não encontrado para edição.', 'erro');
+                return;
+            }
+
+            document.getElementById('descricaoServico').value = servico.descricao || '';
+            document.getElementById('clienteServico').value = servico.cliente || '';
+            document.getElementById('dataServico').value = servico.data || '';
+            document.getElementById('valorServico').value = servico.valorServico || '';
+            document.getElementById('custoMateriais').value = servico.custoMateriais || '';
+            document.getElementById('custoCombustivel').value = servico.custoCombustivel || '';
+            document.getElementById('statusServico').value = servico.status || 'em-andamento';
+            document.getElementById('observacaoServico').value = servico.observacao || '';
+            document.getElementById('servicoIdEdicao').value = servico.id;
+
+            document.getElementById('servicoFormTitle').innerHTML = '<i class="fas fa-edit"></i> Editar Serviço (ID: ' + id + ')';
+            document.getElementById('btnCadastrarServico').style.display = 'none';
+            document.getElementById('btnSalvarEdicao').style.display = 'inline-flex';
+            document.getElementById('btnCancelarEdicao').style.display = 'inline-flex';
+
+            mostrarNotificacao(`Modo de edição ativado para: ${servico.descricao}`, 'info');
+        }
+
+        function salvarEdicaoServico() {
+            const id = parseInt(document.getElementById('servicoIdEdicao').value);
+            const index = servicos.findIndex(s => s.id === id);
+            if (index === -1) {
+                mostrarNotificacao('Erro: ID do serviço para edição não encontrado.', 'erro');
+                return;
+            }
+
+            const descricao = document.getElementById('descricaoServico').value.trim();
+            const cliente = document.getElementById('clienteServico').value.trim();
+            const data = document.getElementById('dataServico').value;
+            const valorServico = parseFloat(document.getElementById('valorServico').value) || 0;
+            const custoMateriais = parseFloat(document.getElementById('custoMateriais').value) || 0;
+            const custoCombustivel = parseFloat(document.getElementById('custoCombustivel').value) || 0;
+            const status = document.getElementById('statusServico').value;
+            const observacao = document.getElementById('observacaoServico').value.trim();
+
+            if (!descricao || !cliente || !data || valorServico <= 0) {
+                mostrarNotificacao('Descrição, Cliente, Data e Valor do Serviço são obrigatórios.', 'erro');
+                return;
+            }
+
+            servicos[index].descricao = descricao;
+            servicos[index].cliente = cliente;
+            servicos[index].data = data;
+            servicos[index].valorServico = valorServico;
+            servicos[index].custoMateriais = custoMateriais;
+            servicos[index].custoCombustivel = custoCombustivel;
+            servicos[index].status = status;
+            servicos[index].observacao = observacao;
+
+            salvarDados();
+            carregarServicos();
+            limparFormularioServico(true);
+            mostrarNotificacao(`Serviço "${descricao}" atualizado com sucesso!`, 'sucesso');
+        }
+
+        function setupPreviewListeners() {
+            const valorInput = document.getElementById('valorServico');
+            const materiaisInput = document.getElementById('custoMateriais');
+            const combustivelInput = document.getElementById('custoCombustivel');
+            const previewDiv = document.getElementById('previewServico');
+            const detalhesDiv = document.getElementById('detalhesPreview');
+
+            const updatePreview = () => {
+                const valorServico = parseFloat(valorInput.value) || 0;
+                const custoMateriais = parseFloat(materiaisInput.value) || 0;
+                const custoCombustivel = parseFloat(combustivelInput.value) || 0;
+
+                if (valorServico > 0) {
+                    const lucro = valorServico - custoMateriais - custoCombustivel;
+                    const margem = valorServico > 0 ? ((lucro / valorServico) * 100) : 0;
+
+                    detalhesDiv.innerHTML = `
+                        <p>Valor do Serviço: <strong>${formatarMoeda(valorServico)}</strong></p>
+                        <p>Custos Totais: <strong>${formatarMoeda(custoMateriais + custoCombustivel)}</strong></p>
+                        <p>Lucro Estimado: <strong class="${lucro >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(lucro)}</strong></p>
+                        <p>Margem de Lucro: <strong class="${margem >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${margem.toFixed(1)}%</strong></p>
+                    `;
+                    previewDiv.style.display = 'block';
+                } else {
+                    previewDiv.style.display = 'none';
+                }
+            };
+
+            valorInput.addEventListener('input', updatePreview);
+            materiaisInput.addEventListener('input', updatePreview);
+            combustivelInput.addEventListener('input', updatePreview);
+        }
+
+        // ========================================
+        // DASHBOARD
+        // ========================================
+        function atualizarDashboard() {
+            const hoje = new Date();
+            const umaSemanaAtras = new Date(hoje.getTime() - (7 * 24 * 60 * 60 * 1000));
+            const umMesAtras = new Date(hoje.getFullYear(), hoje.getMonth() - 1, hoje.getDate());
+
+            // Cálculos para diferentes períodos
+            let totalHoje = { receita: 0, custos: 0, lucro: 0 };
+            let totalSemana = { receita: 0, custos: 0, lucro: 0 };
+            let totalMes = { receita: 0, custos: 0, lucro: 0 };
+            let totalGeral = { receita: 0, custos: 0, lucro: 0 };
+
+            let servicosFinalizados = 0;
+            let servicosAndamento = 0;
+
+            servicos.forEach(servico => {
+                const dataServico = new Date(servico.data + 'T00:00:00');
+                const receita = servico.valorServico || 0;
+                const custos = (servico.custoMateriais || 0) + (servico.custoCombustivel || 0);
+                const lucro = receita - custos;
+
+                // Totais gerais
+                totalGeral.receita += receita;
+                totalGeral.custos += custos;
+                totalGeral.lucro += lucro;
+
+                // Contagem por status
+                if (servico.status === 'finalizado') servicosFinalizados++;
+                if (servico.status === 'em-andamento') servicosAndamento++;
+
+                // Por período
+                if (dataServico.toDateString() === hoje.toDateString()) {
+                    totalHoje.receita += receita;
+                    totalHoje.custos += custos;
+                    totalHoje.lucro += lucro;
+                }
+
+                if (dataServico >= umaSemanaAtras) {
+                    totalSemana.receita += receita;
+                    totalSemana.custos += custos;
+                    totalSemana.lucro += lucro;
+                }
+
+                if (dataServico >= umMesAtras) {
+                    totalMes.receita += receita;
+                    totalMes.custos += custos;
+                    totalMes.lucro += lucro;
+                }
+            });
+
+            // Renderização do Dashboard
+            document.getElementById('dashboardGrid').innerHTML = `
+                <div class="metric-card" style="border-top-color: var(--primary);">
+                    <h3>LUCRO HOJE</h3>
+                    <div class="value ${totalHoje.lucro >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(totalHoje.lucro)}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: var(--success);">
+                    <h3>LUCRO SEMANAL</h3>
+                    <div class="value ${totalSemana.lucro >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(totalSemana.lucro)}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: var(--info);">
+                    <h3>LUCRO MENSAL</h3>
+                    <div class="value ${totalMes.lucro >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(totalMes.lucro)}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: #667eea;">
+                    <h3>LUCRO TOTAL</h3>
+                    <div class="value ${totalGeral.lucro >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(totalGeral.lucro)}</div>
+                </div>
+                
+                <div class="metric-card" style="border-top-color: var(--warning);">
+                    <h3>SERVIÇOS FINALIZADOS</h3>
+                    <div class="value">${servicosFinalizados}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: var(--primary);">
+                    <h3>EM ANDAMENTO</h3>
+                    <div class="value">${servicosAndamento}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: #764ba2;">
+                    <h3>RECEITA TOTAL</h3>
+                    <div class="value">${formatarMoeda(totalGeral.receita)}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: var(--danger);">
+                    <h3>CUSTOS TOTAIS</h3>
+                    <div class="value">${formatarMoeda(totalGeral.custos)}</div>
+                </div>
+            `;
+
+            carregarServicosRecentes();
+        }
+
+        function carregarServicosRecentes() {
+            const lista = document.getElementById('listaServicosRecentes');
+            
+            // Ordena serviços por data (mais recentes primeiro)
+            const servicosRecentes = [...servicos]
+                .sort((a, b) => new Date(b.data) - new Date(a.data))
+                .slice(0, 5);
+
+            if (servicosRecentes.length === 0) {
+                lista.innerHTML = '<p style="text-align: center; color: #6b7280;">Nenhum serviço cadastrado.</p>';
+                return;
+            }
+
+            lista.innerHTML = servicosRecentes.map(servico => {
+                const lucro = calcularLucro(servico);
+                return `
+                    <div class="servico-item ${servico.status}" onclick="editarServico(${servico.id})">
+                        <div>
+                            <strong>${servico.descricao}</strong>
+                            <br>
+                            <small>${servico.cliente} - ${formatarData(servico.data)}</small>
+                            <br>
+                            <small>Lucro: <span class="${lucro >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(lucro)}</span></small>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ========================================
+        // RELATÓRIOS
+        // ========================================
+        function gerarRelatorioPDF() {
+            mostrarNotificacao('Gerando relatório PDF...', 'info');
+
+            if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined' || !window.jspdf.jsPDF.API.autoTable) {
+                mostrarNotificacao('Erro: As bibliotecas jspdf ou jspdf-autotable não estão carregadas. Recarregue a página.', 'erro');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const dataHoraAtual = new Date().toLocaleString('pt-BR');
+
+            const header = function(data) {
+                doc.setFontSize(10);
+                doc.setTextColor(40);
+                doc.text("ControlServ - Relatório de Serviços", data.settings.margin.left, 10);
+                doc.setFontSize(8);
+                doc.setTextColor(150);
+                doc.text(`Gerado em: ${dataHoraAtual}`, doc.internal.pageSize.getWidth() - 14, 10, { align: "right" });
+            };
+
+            const footer = function(data) {
+                const pageCount = doc.internal.getNumberOfPages();
+                doc.setFontSize(8);
+                doc.setTextColor(150);
+                doc.text(`Página ${data.pageNumber} de ${pageCount}`, data.settings.margin.left, doc.internal.pageSize.getHeight() - 10);
+                doc.text("ControlServ - Gestão de Serviços", doc.internal.pageSize.getWidth() - 14, doc.internal.pageSize.getHeight() - 10, { align: "right" });
+            };
+
+            // Tabela de Serviços
+            const servicosColumns = ["ID", "Descrição", "Cliente", "Data", "Valor", "Materiais", "Combustível", "Lucro", "Status"];
+            const servicosData = servicos.map(s => {
+                const lucro = calcularLucro(s);
+                return [
+                    s.id,
+                    s.descricao,
+                    s.cliente,
+                    formatarData(s.data),
+                    formatarMoeda(s.valorServico),
+                    formatarMoeda(s.custoMateriais),
+                    formatarMoeda(s.custoCombustivel),
+                    formatarMoeda(lucro),
+                    s.status === 'finalizado' ? 'Finalizado' : s.status === 'em-andamento' ? 'Em Andamento' : 'Cancelado'
+                ];
+            });
+
+            doc.text("Relatório de Serviços - ControlServ", 14, 20);
+            doc.autoTable({
+                startY: 25,
+                head: [servicosColumns],
+                body: servicosData,
+                didDrawPage: header,
+                styles: { 
+                    fontSize: 8,
+                    cellPadding: 2,
+                },
+                headStyles: { 
+                    fillColor: [16, 185, 129],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                theme: 'striped'
+            });
+
+            // Adiciona rodapé
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                footer({ pageNumber: i, settings: { margin: { left: 14 } } });
+            }
+
+            doc.save('Relatorio_Servicos_ControlServ.pdf');
+            mostrarNotificacao('Relatório PDF gerado com sucesso!', 'sucesso');
+        }
+
+        function gerarRelatorioCSV() {
+            mostrarNotificacao('Exportando dados para CSV...', 'info');
+            
+            const headers = [
+                "ID",
+                "Descrição",
+                "Cliente", 
+                "Data",
+                "Valor Serviço",
+                "Custo Materiais",
+                "Custo Combustível",
+                "Lucro",
+                "Status",
+                "Observações"
+            ];
+            
+            let csvContent = headers.join(";") + "\n";
+
+            servicos.forEach(servico => {
+                const lucro = calcularLucro(servico);
+                const formatNum = (val) => (parseFloat(val) || 0).toFixed(2).replace('.', ',');
+
+                const row = [
+                    servico.id,
+                    `"${servico.descricao}"`,
+                    `"${servico.cliente}"`,
+                    formatarData(servico.data),
+                    formatNum(servico.valorServico),
+                    formatNum(servico.custoMateriais),
+                    formatNum(servico.custoCombustivel),
+                    formatNum(lucro),
+                    servico.status === 'finalizado' ? 'Finalizado' : servico.status === 'em-andamento' ? 'Em Andamento' : 'Cancelado',
+                    `"${servico.observacao || ''}"`
+                ];
+                csvContent += row.join(";") + "\n";
+            });
+
+            const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            const now = new Date();
+            const dateString = now.toISOString().split('T')[0].replace(/-/g, '_');
+            const exportFileDefaultName = `Relatorio_Servicos_${dateString}.csv`;
+
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', url);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            document.body.appendChild(linkElement);
+            linkElement.click();
+            document.body.removeChild(linkElement);
+
+            mostrarNotificacao('Exportação para CSV concluída!', 'sucesso');
+        }
+        
+        // ========================================
+        // EXPORT/IMPORT/LIMPAR DADOS
+        // ========================================
+        function exportarDados() {
+            const dados = { servicos: servicos };
+            const jsonString = JSON.stringify(dados, null, 2);
+            
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonString);
+            
+            const now = new Date();
+            const dateString = now.toISOString().split('T')[0].replace(/-/g, '_');
+            const exportFileDefaultName = `backup_servicos_${dateString}.json`;
+
+            let linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            mostrarNotificacao('Backup exportado com sucesso!', 'sucesso');
+        }
+
+        function importarDados() {
+            const fileInput = document.getElementById('arquivoBackup');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                mostrarNotificacao('Selecione um arquivo JSON para importar.', 'erro');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (!data.servicos) {
+                        mostrarNotificacao('O arquivo JSON não está no formato esperado.', 'erro');
+                        return;
+                    }
+                    if (confirm("ATENÇÃO: A importação irá SOBRESCREVER os dados atuais. Deseja continuar?")) {
+                        servicos = data.servicos;
+                        salvarDados();
+                        checkInitializers();
+                        mostrarNotificacao('Dados importados com sucesso!', 'sucesso');
+                    }
+                } catch (e) {
+                    mostrarNotificacao('Erro ao processar o arquivo. Certifique-se de que é um JSON válido.', 'erro');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function limparDados() {
+            if (confirm("ATENÇÃO: Você tem certeza que deseja limpar TODOS os dados? Esta ação é irreversível.")) {
+                servicos = [];
+                salvarDados();
+                checkInitializers();
+                mostrarNotificacao('Todos os dados foram limpos com sucesso!', 'sucesso');
+            }
+        }
+
+        function criarDadosExemplo() {
+            const dataHoje = obterDataHojeISO();
+            const servicosExemplo = [
+                {
+                    id: 1001,
+                    descricao: "Instalação de Câmeras de Segurança",
+                    cliente: "João Silva",
+                    data: dataHoje,
+                    valorServico: 1200.00,
+                    custoMateriais: 450.00,
+                    custoCombustivel: 35.00,
+                    status: "finalizado",
+                    observacao: "4 câmeras instaladas na residência",
+                    dataCadastro: dataHoje
+                },
+                {
+                    id: 1002,
+                    descricao: "Instalação de Cerca Elétrica",
+                    cliente: "Maria Oliveira",
+                    data: dataHoje,
+                    valorServico: 800.00,
+                    custoMateriais: 280.00,
+                    custoCombustivel: 25.00,
+                    status: "em-andamento",
+                    observacao: "50 metros de cerca - finalizar amanhã",
+                    dataCadastro: dataHoje
+                },
+                {
+                    id: 1003,
+                    descricao: "Manutenção de Portão Eletrônico",
+                    cliente: "Carlos Souza",
+                    data: '2024-02-15',
+                    valorServico: 350.00,
+                    custoMateriais: 120.00,
+                    custoCombustivel: 20.00,
+                    status: "finalizado",
+                    observacao: "Troca de motor do portão",
+                    dataCadastro: '2024-02-15'
+                }
+            ];
+
+            servicos = servicosExemplo;
+            salvarDados();
+            checkInitializers();
+            mostrarNotificacao('Dados de exemplo criados com sucesso!', 'sucesso');
+        }
+        
+        // ========================================
+        // INICIALIZAÇÃO
+        // ========================================
+        function checkInitializers() {
+            carregarServicos();
+            atualizarDashboard();
+            document.getElementById('dataServico').value = obterDataHojeISO();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkInitializers();
+            setupPreviewListeners();
+        });
+    </script>
+</body>
+</html>
