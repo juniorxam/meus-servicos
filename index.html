@@ -8,36 +8,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     
-    <!-- Scripts do Google API com funções definidas primeiro -->
-    <script>
-        // Função gapiLoaded deve ser definida globalmente
-        function gapiLoaded() {
-            console.log('GAPI carregado, inicializando cliente...');
-            gapi.load('client', initializeGapiClient);
-        }
-        
-        // Função para quando GIS carregar
-        function gisLoaded() {
-            console.log('GIS carregado');
-        }
-        
-        // Tratamento de erro para scripts externos
-        window.addEventListener('error', function(e) {
-            if (e.target.tagName === 'SCRIPT' && !e.target.src.includes('reasonlabsapi.com')) {
-                console.warn('Script falhou ao carregar:', e.target.src);
-            }
-        });
-    </script>
-    
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script>
-    
-    <meta name="theme-color" content="#10b981">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="./manifest.json" crossorigin="use-credentials">
-
     <style>
         :root {
             --primary: #10b981;
@@ -485,9 +455,167 @@
 
         .lucro-positivo { color: var(--success); font-weight: 700; }
         .lucro-negativo { color: var(--danger); font-weight: 700; }
+
+        /* NOVOS ESTILOS PARA LOADING DO DRIVE */
+        .loading-drive {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            z-index: 10000;
+            text-align: center;
+            min-width: 250px;
+        }
+        
+        .drive-status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 15px;
+            display: inline-block;
+            font-weight: 600;
+        }
+        
+        .drive-status.loading { background: #fef3c7; color: #92400e; }
+        .drive-status.ready { background: #d1fae5; color: #065f46; }
+        .drive-status.error { background: #fee2e2; color: #991b1b; }
+        .drive-status.warning { background: #fef3c7; color: #92400e; }
+        
+        .btn-drive {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-drive.loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
+
+    <!-- Scripts do Google API com tratamento de timeout -->
+    <script>
+        let gapiLoadTimeout;
+        let gapiLoadedSuccessfully = false;
+        let driveAPILoaded = false;
+        
+        function gapiLoaded() {
+            console.log('GAPI carregado, inicializando cliente...');
+            clearTimeout(gapiLoadTimeout);
+            gapiLoadedSuccessfully = true;
+            updateDriveStatus('Bibliotecas carregadas', 'ready');
+            gapi.load('client', initializeGapiClient);
+        }
+        
+        function gapiLoadError() {
+            console.error('Falha ao carregar GAPI');
+            updateDriveStatus('Erro ao carregar Google Drive', 'error');
+            hideLoading();
+            driveAPILoaded = false;
+        }
+        
+        function gisLoaded() {
+            console.log('GIS carregado');
+            updateDriveStatus('Pronto para autenticação', 'ready');
+            hideLoading();
+            driveAPILoaded = true;
+        }
+        
+        function updateDriveStatus(message, type) {
+            const statusElement = document.getElementById('driveStatus');
+            if (statusElement) {
+                statusElement.textContent = message;
+                statusElement.className = `drive-status ${type}`;
+            }
+        }
+        
+        function showLoading(message = 'Carregando Google Drive...') {
+            document.getElementById('loadingDrive').style.display = 'block';
+            updateDriveStatus(message, 'loading');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingDrive').style.display = 'none';
+        }
+        
+        function setDriveButtonLoading(buttonId, isLoading) {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                if (isLoading) {
+                    button.classList.add('loading');
+                    button.disabled = true;
+                } else {
+                    button.classList.remove('loading');
+                    button.disabled = false;
+                }
+            }
+        }
+
+        // Timeout para carregamento do GAPI (20 segundos)
+        gapiLoadTimeout = setTimeout(() => {
+            if (!gapiLoadedSuccessfully) {
+                console.warn('Timeout no carregamento do GAPI');
+                gapiLoadError();
+            }
+        }, 20000);
+        
+        // Tratamento de erro para scripts externos
+        window.addEventListener('error', function(e) {
+            if (e.target.tagName === 'SCRIPT' && !e.target.src.includes('reasonlabsapi.com')) {
+                console.warn('Script falhou ao carregar:', e.target.src);
+            }
+        });
+    </script>
+    
+    <!-- Scripts do Google com tratamento de erro -->
+    <script src="https://accounts.google.com/gsi/client" async defer onerror="gapiLoadError()"></script>
+    <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" onerror="gapiLoadError()" async defer></script>
+    
+    <meta name="theme-color" content="#10b981">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="./manifest.json" crossorigin="use-credentials">
 </head>
 <body>
+    <!-- Loading do Google Drive -->
+    <div id="loadingDrive" class="loading-drive">
+        <div class="spinner"></div>
+        <h3>Carregando Google Drive</h3>
+        <p>Aguarde enquanto as bibliotecas são carregadas...</p>
+        <div id="driveStatus" class="drive-status loading">Iniciando carregamento</div>
+    </div>
+
     <button id="installButton" style="display: none;">
         <i class="fas fa-download"></i> INSTALAR APP
     </button>
@@ -650,11 +778,14 @@
                 <div class="card" style="border-left-color: var(--info);">
                     <h2><i class="fab fa-google-drive"></i> Backup no Google Drive</h2>
                     <p>Faça backup ou restaure seus dados de serviços diretamente do seu Google Drive.</p>
+                    <div id="driveStatusCard" class="drive-status warning" style="margin-bottom: 15px; display: block;">
+                        Carregando bibliotecas do Google Drive...
+                    </div>
                     <div class="action-buttons" style="flex-direction: column;">
-                        <button id="btnSalvarDrive" onclick="salvarBackupDrive()" style="background: var(--info);">
+                        <button id="btnSalvarDrive" onclick="salvarBackupDrive()" style="background: var(--info);" class="btn-drive">
                             <i class="fas fa-cloud-upload-alt"></i> Salvar Backup no Drive
                         </button>
-                        <button id="btnCarregarDrive" onclick="carregarBackupDrive()" style="background: var(--warning);">
+                        <button id="btnCarregarDrive" onclick="carregarBackupDrive()" style="background: var(--warning);" class="btn-drive">
                             <i class="fas fa-cloud-download-alt"></i> Carregar Backup do Drive
                         </button>
                     </div>
@@ -766,12 +897,15 @@
                 });
                 gapiInited = true;
                 console.log('GAPI Client inicializado com sucesso');
+                updateDriveStatus('GAPI inicializado', 'ready');
                 
                 // Inicializa GIS após GAPI estar pronto
                 gisLoaded();
             } catch (error) {
                 console.error('Erro ao inicializar gapi.client:', error);
+                updateDriveStatus('Erro ao inicializar GAPI', 'error');
                 mostrarNotificacao('Erro ao carregar a API do Google Drive.', 'erro');
+                hideLoading();
             }
         }
 
@@ -785,6 +919,26 @@
             });
             gisInited = true;
             console.log('GIS inicializado. Pronto para autenticação.');
+            updateDriveStatus('Google Drive pronto para uso', 'ready');
+            hideLoading();
+            
+            // Atualiza o status na aba de relatórios
+            const driveStatusCard = document.getElementById('driveStatusCard');
+            if (driveStatusCard) {
+                driveStatusCard.textContent = 'Google Drive conectado e pronto';
+                driveStatusCard.className = 'drive-status ready';
+            }
+            
+            driveAPILoaded = true;
+        }
+
+        function checkDriveReady() {
+            if (!driveAPILoaded) {
+                mostrarNotificacao('Aguarde o carregamento do Google Drive...', 'erro');
+                showLoading('Preparando Google Drive...');
+                return false;
+            }
+            return true;
         }
 
         async function searchBackupFile() {
@@ -806,25 +960,31 @@
                     return false;
                 }
             } catch (error) {
-                // Se houver erro, provavelmente o token expirou ou não há autorização ativa
                 console.error('Erro ao buscar arquivo no Drive:', error);
                 return false; 
             }
         }
         
         function salvarBackupDrive() {
+            if (!checkDriveReady()) return;
+            
             if (!gapiInited || !gisInited) {
                 mostrarNotificacao('Aguarde a inicialização das bibliotecas do Google Drive.', 'erro');
                 return;
             }
 
+            setDriveButtonLoading('btnSalvarDrive', true);
+            showLoading('Iniciando autenticação...');
+
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) {
                     mostrarNotificacao('Autorização do Drive negada ou erro.', 'erro');
+                    setDriveButtonLoading('btnSalvarDrive', false);
+                    hideLoading();
                     return;
                 }
 
-                mostrarNotificacao('Autorização concedida. Buscando arquivo...', 'info');
+                showLoading('Autenticado. Salvando backup...');
 
                 try {
                     // Prepara os dados
@@ -840,11 +1000,10 @@
                     };
 
                     let request;
-                    const boundary = 'foo_bar_baz'; // Definir um boundary
 
                     if (isUpdate && fileId) {
                         // ATUALIZAR (PATCH)
-                        mostrarNotificacao(`Atualizando arquivo existente (ID: ${fileId})...`, 'info');
+                        showLoading(`Atualizando arquivo existente...`);
                         
                         const form = new FormData();
                         form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
@@ -854,15 +1013,13 @@
                             path: '/upload/drive/v3/files/' + fileId,
                             method: 'PATCH',
                             params: { uploadType: 'multipart' },
-                            // gapi.client.request automaticamente lida com o boundary do FormData
                             body: form 
                         });
 
                     } else {
                         // CRIAR NOVO (POST)
-                        mostrarNotificacao('Criando novo arquivo de backup...', 'info');
+                        showLoading('Criando novo arquivo de backup...');
                         
-                        // Formata a requisição multipart/related
                         const form = new FormData();
                         form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
                         form.append('file', fileContent);
@@ -883,6 +1040,9 @@
                 } catch (e) {
                     console.error('Erro no upload para o Drive:', e);
                     mostrarNotificacao('Erro ao salvar o backup no Google Drive.', 'erro');
+                } finally {
+                    setDriveButtonLoading('btnSalvarDrive', false);
+                    hideLoading();
                 }
             };
 
@@ -891,28 +1051,37 @@
         }
         
         function carregarBackupDrive() {
+            if (!checkDriveReady()) return;
+            
             if (!gapiInited || !gisInited) {
                 mostrarNotificacao('Aguarde a inicialização das bibliotecas do Google Drive.', 'erro');
                 return;
             }
 
+            setDriveButtonLoading('btnCarregarDrive', true);
+            showLoading('Iniciando autenticação...');
+
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) {
                     mostrarNotificacao('Autorização do Drive negada ou erro.', 'erro');
+                    setDriveButtonLoading('btnCarregarDrive', false);
+                    hideLoading();
                     return;
                 }
 
-                mostrarNotificacao('Autorização concedida. Buscando arquivo...', 'info');
+                showLoading('Autenticado. Buscando arquivo...');
                 
                 try {
                     let found = await searchBackupFile();
                     
                     if (!found || !fileId) {
                         mostrarNotificacao('Nenhum arquivo de backup encontrado no Drive.', 'erro');
+                        setDriveButtonLoading('btnCarregarDrive', false);
+                        hideLoading();
                         return;
                     }
                     
-                    mostrarNotificacao(`Baixando backup (ID: ${fileId})...`, 'info');
+                    showLoading(`Baixando backup...`);
 
                     // Faz o download do conteúdo do arquivo (alt=media)
                     const response = await gapi.client.drive.files.get({
@@ -936,6 +1105,9 @@
                 } catch (e) {
                     console.error('Erro no download do Drive:', e);
                     mostrarNotificacao('Erro ao carregar o backup do Google Drive.', 'erro');
+                } finally {
+                    setDriveButtonLoading('btnCarregarDrive', false);
+                    hideLoading();
                 }
             };
 
@@ -1015,9 +1187,19 @@
                 carregarServicos();
                 limparFormularioServico(true);
             } else if (tabName === 'relatorios') {
-                // Tenta buscar o arquivo de backup se já tivermos as libs prontas e um token
-                if (gapiInited && gisInited && gapi.client.getToken()) {
-                    searchBackupFile(); 
+                // Atualiza status do Drive
+                const driveStatusCard = document.getElementById('driveStatusCard');
+                if (driveStatusCard) {
+                    if (driveAPILoaded) {
+                        driveStatusCard.textContent = 'Google Drive conectado e pronto';
+                        driveStatusCard.className = 'drive-status ready';
+                    } else if (!gapiLoadedSuccessfully) {
+                        driveStatusCard.textContent = 'Erro ao carregar Google Drive';
+                        driveStatusCard.className = 'drive-status error';
+                    } else {
+                        driveStatusCard.textContent = 'Carregando bibliotecas do Google Drive...';
+                        driveStatusCard.className = 'drive-status loading';
+                    }
                 }
             }
         }
@@ -1599,6 +1781,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             checkInitializers();
             setupPreviewListeners();
+            
+            // Mostra loading inicial do Drive
+            showLoading('Carregando Google Drive...');
         });
     </script>
 </body>
