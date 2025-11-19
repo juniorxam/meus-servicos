@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>ControlServ - Gestão de Serviços</title>
     
+    <!-- CSS e Scripts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -599,7 +600,7 @@
         }
     </style>
 </head>
-<body onload="atualizarDashboard()">
+<body>
     <header>
         <i class="fas fa-tools"></i>
         ControlServ - Gestão de Serviços
@@ -625,6 +626,7 @@
     </div>
 
     <div class="container">
+        <!-- DASHBOARD -->
         <div id="dashboard" class="tab-content active">
             <div class="dashboard-layout">
                 <div class="dashboard-main">
@@ -656,6 +658,7 @@
             </div>
         </div>
         
+        <!-- SERVIÇOS -->
         <div id="servicos" class="tab-content">
             <div class="info-box warning">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -667,54 +670,58 @@
                     <div class="card">
                         <h2 id="servicoFormTitle"><i class="fas fa-plus-circle"></i> Novo Serviço</h2>
                         
-                        <div class="form-grid grid-2-cols">
+                        <div class="form-grid grid-3-cols">
+                            <!-- DADOS BÁSICOS -->
                             <div class="form-group full-width">
-                                <label for="descricaoServico">Descrição do Serviço:</label>
+                                <label for="descricaoServico">Descrição do Serviço *</label>
                                 <input type="text" id="descricaoServico" placeholder="Ex: Instalação de câmeras, cerca elétrica..." required>
                             </div>
                             
                             <div class="form-group">
-                                <label for="clienteServico">Cliente:</label>
+                                <label for="clienteServico">Cliente *</label>
                                 <input type="text" id="clienteServico" placeholder="Nome do cliente" required>
                             </div>
                             
                             <div class="form-group">
-                                <label for="telefoneCliente">Telefone:</label>
+                                <label for="telefoneCliente">Telefone</label>
                                 <input type="tel" id="telefoneCliente" placeholder="(11) 99999-9999">
                             </div>
-                            
+
+                            <!-- DATAS E DURAÇÃO -->
                             <div class="form-group">
-                                <label for="dataInicio">Data Início:</label>
-                                <input type="date" id="dataInicio" required>
+                                <label for="dataInicio">Data Início *</label>
+                                <input type="date" id="dataInicio" required onchange="calcularDuracaoAutomatica()">
                             </div>
                             
                             <div class="form-group">
-                                <label for="dataFim">Data Fim (Previsão):</label>
-                                <input type="date" id="dataFim">
+                                <label for="dataFim">Data Fim</label>
+                                <input type="date" id="dataFim" onchange="calcularDuracaoAutomatica()">
                             </div>
                             
                             <div class="form-group">
-                                <label for="duracaoDias">Duração (dias):</label>
+                                <label for="duracaoDias">Duração (dias)</label>
                                 <input type="number" id="duracaoDias" min="1" placeholder="1" onchange="calcularDataFim()">
                             </div>
-                            
+
+                            <!-- VALORES FINANCEIROS -->
                             <div class="form-group">
-                                <label for="valorServico">Valor do Serviço (R$):</label>
-                                <input type="number" id="valorServico" step="0.01" min="0" placeholder="1000.00" required>
+                                <label for="valorServico">Valor Serviço (R$) *</label>
+                                <input type="number" id="valorServico" step="0.01" min="0" placeholder="1000.00" required oninput="atualizarPreview()">
                             </div>
                             
                             <div class="form-group">
-                                <label for="custoMateriais">Custo com Materiais (R$):</label>
-                                <input type="number" id="custoMateriais" step="0.01" min="0" placeholder="300.00" required>
+                                <label for="custoMateriais">Custo Materiais (R$) *</label>
+                                <input type="number" id="custoMateriais" step="0.01" min="0" placeholder="300.00" required oninput="atualizarPreview()">
                             </div>
                             
                             <div class="form-group">
-                                <label for="custoCombustivel">Custo com Combustível (R$):</label>
-                                <input type="number" id="custoCombustivel" step="0.01" min="0" placeholder="50.00" required>
+                                <label for="custoCombustivel">Custo Combustível (R$) *</label>
+                                <input type="number" id="custoCombustivel" step="0.01" min="0" placeholder="50.00" required oninput="atualizarPreview()">
                             </div>
-                            
+
+                            <!-- STATUS E PAGAMENTO -->
                             <div class="form-group">
-                                <label for="statusServico">Status do Serviço:</label>
+                                <label for="statusServico">Status do Serviço *</label>
                                 <select id="statusServico" required>
                                     <option value="em-andamento">Em Andamento</option>
                                     <option value="finalizado">Finalizado</option>
@@ -723,27 +730,43 @@
                             </div>
                             
                             <div class="form-group">
-                                <label for="statusPagamento">Status do Pagamento:</label>
+                                <label for="statusPagamento">Status Pagamento *</label>
                                 <select id="statusPagamento" required>
                                     <option value="pendente">Pendente</option>
-                                    <option value="pago">Pago</option>
                                     <option value="parcial">Parcial</option>
+                                    <option value="pago">Pago</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="formaPagamento">Forma de Pagamento</label>
+                                <select id="formaPagamento">
+                                    <option value="">Selecione...</option>
+                                    <option value="dinheiro">Dinheiro</option>
+                                    <option value="pix">PIX</option>
+                                    <option value="cartao-debito">Cartão Débito</option>
+                                    <option value="cartao-credito">Cartão Crédito</option>
+                                    <option value="transferencia">Transferência</option>
+                                    <option value="boleto">Boleto</option>
+                                    <option value="outro">Outro</option>
                                 </select>
                             </div>
                             
                             <div class="form-group full-width">
-                                <label for="observacaoServico">Observações:</label>
-                                <textarea id="observacaoServico" placeholder="Detalhes do serviço, endereço, etc..." rows="3"></textarea>
+                                <label for="observacaoServico">Observações</label>
+                                <textarea id="observacaoServico" placeholder="Detalhes do serviço, endereço, informações adicionais..." rows="3"></textarea>
                             </div>
                             
                             <input type="hidden" id="servicoIdEdicao">
                         </div>
 
+                        <!-- PREVIEW DO SERVIÇO -->
                         <div id="previewServico" style="background: #f8fafc; padding: 15px; border-radius: 8px; margin: 15px 0; display: none;">
                             <h4><i class="fas fa-calculator"></i> Resumo do Serviço</h4>
                             <div id="detalhesPreview"></div>
                         </div>
 
+                        <!-- BOTÕES DE AÇÃO -->
                         <div class="action-buttons">
                             <button id="btnCadastrarServico" onclick="adicionarServico()">
                                 <i class="fas fa-check-circle"></i> Cadastrar Serviço
@@ -768,22 +791,23 @@
                             <label for="filtroServicos">Filtrar por Cliente ou Status:</label>
                             <input type="text" id="filtroServicos" oninput="filtrarServicos()" placeholder="Nome do cliente ou status">
                         </div>
-                        <div id="listaServicos">
-                            </div>
+                        <div id="listaServicos"></div>
                     </div>
                     <div class="info-box tips">
                         <p><strong>💡 Dicas de Uso:</strong></p>
                         <ul style="margin: 10px 0; padding-left: 20px;">
-                            <li>Registre TODOS os custos para cálculo preciso do lucro.</li>
-                            <li>Atualize o status quando finalizar um serviço.</li>
-                            <li>Marque como "Pago" quando receber o pagamento.</li>
-                            <li>Use a data fim para controlar prazos de entrega.</li>
+                            <li>Preencha Data Início e Data Fim para cálculo automático da duração</li>
+                            <li>Ou informe a duração em dias para cálculo da Data Fim</li>
+                            <li>Registre TODOS os custos para cálculo preciso do lucro</li>
+                            <li>Atualize o status quando finalizar um serviço</li>
+                            <li>Marque como "Pago" quando receber o pagamento</li>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- RELATÓRIOS -->
         <div id="relatorios" class="tab-content">
             <div class="config-grid">
                 <div class="card" style="border-left-color: var(--danger);">
@@ -850,6 +874,7 @@
                 </div>
             </div>
 
+            <!-- SEÇÃO DE ANÁLISE FINANCEIRA EM TEMPO REAL -->
             <div id="analiseFinanceira" style="display: none;">
                 <div class="relatorio-section">
                     <div class="relatorio-header">
@@ -858,7 +883,8 @@
                     </div>
 
                     <div class="relatorio-metricas" id="metricasTempoReal">
-                        </div>
+                        <!-- Métricas serão preenchidas via JavaScript -->
+                    </div>
 
                     <div class="charts-grid">
                         <div class="card">
@@ -890,6 +916,7 @@
             </div>
         </div>
 
+        <!-- BACKUP E CONFIGURAÇÕES -->
         <div id="backup" class="tab-content">
             <div class="config-grid">
                 <div class="card" style="border-left-color: var(--primary);">
@@ -937,13 +964,6 @@
         // ========================================
         let servicos = JSON.parse(localStorage.getItem("servicos")) || [];
         let initializersRan = false;
-        
-        // Gráfico de Instância
-        let chartStatusInstance = null;
-        let chartLucroInstance = null;
-        let chartReceitaCustosInstance = null;
-        let chartEvolucaoInstance = null;
-
 
         // ========================================
         // FUNÇÕES BÁSICAS
@@ -997,39 +1017,76 @@
         }
 
         function calcularLucro(servico) {
-            const valorServico = parseFloat(servico.valorServico) || 0;
-            const custoMateriais = parseFloat(servico.custoMateriais) || 0;
-            const custoCombustivel = parseFloat(servico.custoCombustivel) || 0;
+            const valorServico = servico.valorServico || 0;
+            const custoMateriais = servico.custoMateriais || 0;
+            const custoCombustivel = servico.custoCombustivel || 0;
             return valorServico - custoMateriais - custoCombustivel;
         }
 
         function calcularDuracaoDias(dataInicio, dataFim) {
             if (!dataInicio || !dataFim) return 0;
-            // Cria objetos Date para o início dos dias (meia-noite)
-            const inicio = new Date(dataInicio + 'T00:00:00');
-            const fim = new Date(dataFim + 'T00:00:00');
-            
-            // Calcula a diferença em milissegundos
-            const diffTime = fim.getTime() - inicio.getTime();
-            
-            // Converte para dias e adiciona 1 (para incluir o dia de início e o dia de fim, se for o mesmo)
-            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-            
+            const inicio = new Date(dataInicio);
+            const fim = new Date(dataFim);
+            const diffTime = Math.abs(fim - inicio);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             return diffDays + 1;
+        }
+
+        // ========================================
+        // NOVAS FUNÇÕES PARA CÁLCULO AUTOMÁTICO
+        // ========================================
+
+        function calcularDuracaoAutomatica() {
+            const dataInicio = document.getElementById('dataInicio').value;
+            const dataFim = document.getElementById('dataFim').value;
+            
+            if (dataInicio && dataFim) {
+                const duracao = calcularDuracaoDias(dataInicio, dataFim);
+                document.getElementById('duracaoDias').value = duracao;
+            }
         }
 
         function calcularDataFim() {
             const dataInicio = document.getElementById('dataInicio').value;
             const duracaoDias = parseInt(document.getElementById('duracaoDias').value) || 1;
             
-            if (dataInicio && duracaoDias > 0) {
-                const dataInicioObj = new Date(dataInicio + 'T00:00:00');
+            if (dataInicio) {
+                const dataInicioObj = new Date(dataInicio);
                 const dataFimObj = new Date(dataInicioObj);
                 dataFimObj.setDate(dataInicioObj.getDate() + duracaoDias - 1);
                 
                 document.getElementById('dataFim').value = dataFimObj.toISOString().split('T')[0];
+            }
+        }
+
+        function atualizarPreview() {
+            const valorServico = parseFloat(document.getElementById('valorServico').value) || 0;
+            const custoMateriais = parseFloat(document.getElementById('custoMateriais').value) || 0;
+            const custoCombustivel = parseFloat(document.getElementById('custoCombustivel').value) || 0;
+            const previewDiv = document.getElementById('previewServico');
+            const detalhesDiv = document.getElementById('detalhesPreview');
+
+            if (valorServico > 0) {
+                const lucro = valorServico - custoMateriais - custoCombustivel;
+                const margem = valorServico > 0 ? ((lucro / valorServico) * 100) : 0;
+
+                detalhesDiv.innerHTML = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
+                        <div>
+                            <p><strong>Valor do Serviço:</strong><br>${formatarMoeda(valorServico)}</p>
+                            <p><strong>Custos Totais:</strong><br>${formatarMoeda(custoMateriais + custoCombustivel)}</p>
+                        </div>
+                        <div>
+                            <p><strong>Lucro Estimado:</strong><br>
+                            <span class="${lucro >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(lucro)}</span></p>
+                            <p><strong>Margem de Lucro:</strong><br>
+                            <span class="${margem >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${margem.toFixed(1)}%</span></p>
+                        </div>
+                    </div>
+                `;
+                previewDiv.style.display = 'block';
             } else {
-                document.getElementById('dataFim').value = '';
+                previewDiv.style.display = 'none';
             }
         }
 
@@ -1050,17 +1107,16 @@
             }
             
             if (tabName === 'servicos') {
-                if (document.getElementById('dataInicio').value === '') {
-                    document.getElementById('dataInicio').value = obterDataHojeISO();
-                    document.getElementById('duracaoDias').value = 1;
-                    calcularDataFim();
-                }
-                carregarServicos();
-                limparFormularioServico(false);
+                document.getElementById('dataInicio').value = obterDataHojeISO();
+                document.getElementById('duracaoDias').value = 1;
+                calcularDataFim();
             }
             
             if (tabName === 'dashboard') {
                 atualizarDashboard();
+            } else if (tabName === 'servicos') {
+                carregarServicos();
+                limparFormularioServico(true);
             } else if (tabName === 'relatorios') {
                 // Atualiza análise financeira se estiver visível
                 if (document.getElementById('analiseFinanceira').style.display !== 'none') {
@@ -1105,14 +1161,20 @@
                     'parcial': 'Parcial'
                 }[servico.statusPagamento] || 'Pendente';
 
-                const pagamentoClass = servico.statusPagamento === 'pago' ? 'pagamento-pago' : servico.statusPagamento === 'parcial' ? 'pagamento-pendente' : 'pagamento-pendente';
-                
-                // Calcula a duração correta ou usa o valor salvo
-                let duracao = servico.duracaoDias || 0;
-                if (duracao === 0 && servico.dataInicio && servico.dataFim) {
-                    duracao = calcularDuracaoDias(servico.dataInicio, servico.dataFim);
-                }
+                const formaPagamentoText = {
+                    'dinheiro': '💵 Dinheiro',
+                    'pix': '📱 PIX',
+                    'cartao-debito': '💳 Cartão Débito',
+                    'cartao-credito': '💳 Cartão Crédito',
+                    'transferencia': '🏦 Transferência',
+                    'boleto': '📄 Boleto',
+                    'outro': '📋 Outro'
+                }[servico.formaPagamento] || '';
 
+                const pagamentoClass = servico.statusPagamento === 'pago' ? 'pagamento-pago' : 
+                                      servico.statusPagamento === 'parcial' ? 'pagamento-pendente' : 'pagamento-pendente';
+
+                const duracao = servico.duracaoDias || calcularDuracaoDias(servico.dataInicio, servico.dataFim);
                 const cardClass = servico.statusPagamento === 'pago' ? `${statusClass} pago` : statusClass;
 
                 return `
@@ -1129,6 +1191,7 @@
                         <p><strong>📅 Início:</strong> ${formatarData(servico.dataInicio)}</p>
                         ${servico.dataFim ? `<p><strong>📅 Fim:</strong> ${formatarData(servico.dataFim)}</p>` : ''}
                         ${duracao > 0 ? `<p><strong>⏱️ Duração:</strong> ${duracao} dia${duracao > 1 ? 's' : ''}</p>` : ''}
+                        ${servico.formaPagamento ? `<p><strong>💳 Forma Pagamento:</strong> ${formaPagamentoText}</p>` : ''}
                         <p><strong>💰 Valor:</strong> ${formatarMoeda(servico.valorServico)}</p>
                         <p><strong>🔧 Materiais:</strong> ${formatarMoeda(servico.custoMateriais)}</p>
                         <p><strong>⛽ Combustível:</strong> ${formatarMoeda(servico.custoCombustivel)}</p>
@@ -1138,7 +1201,7 @@
                 `;
             }).join('');
         }
-
+        
         function limparFormularioServico(cancelarEdicao = false) {
             document.getElementById('descricaoServico').value = '';
             document.getElementById('clienteServico').value = '';
@@ -1151,18 +1214,22 @@
             document.getElementById('custoCombustivel').value = '';
             document.getElementById('statusServico').value = 'em-andamento';
             document.getElementById('statusPagamento').value = 'pendente';
+            document.getElementById('formaPagamento').value = '';
             document.getElementById('observacaoServico').value = '';
             document.getElementById('servicoIdEdicao').value = '';
+            
             document.getElementById('servicoFormTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Novo Serviço';
             document.getElementById('btnCadastrarServico').style.display = 'inline-flex';
             document.getElementById('btnSalvarEdicao').style.display = 'none';
             document.getElementById('btnCancelarEdicao').style.display = 'none';
+
             document.getElementById('previewServico').style.display = 'none';
+
             if (cancelarEdicao) {
                 mostrarNotificacao('Modo de cadastro ativado.', 'info');
             }
         }
-
+        
         function adicionarServico() {
             const descricao = document.getElementById('descricaoServico').value.trim();
             const cliente = document.getElementById('clienteServico').value.trim();
@@ -1175,6 +1242,7 @@
             const custoCombustivel = parseFloat(document.getElementById('custoCombustivel').value) || 0;
             const status = document.getElementById('statusServico').value;
             const statusPagamento = document.getElementById('statusPagamento').value;
+            const formaPagamento = document.getElementById('formaPagamento').value;
             const observacao = document.getElementById('observacaoServico').value.trim();
 
             if (!descricao || !cliente || !dataInicio || valorServico <= 0) {
@@ -1195,6 +1263,7 @@
                 custoCombustivel,
                 status,
                 statusPagamento,
+                formaPagamento,
                 observacao,
                 dataCadastro: obterDataHojeISO()
             };
@@ -1219,29 +1288,30 @@
             document.getElementById('telefoneCliente').value = servico.telefone || '';
             document.getElementById('dataInicio').value = servico.dataInicio || '';
             document.getElementById('dataFim').value = servico.dataFim || '';
-            document.getElementById('duracaoDias').value = servico.duracaoDias || calcularDuracaoDias(servico.dataInicio, servico.dataFim) || 1;
+            document.getElementById('duracaoDias').value = servico.duracaoDias || 1;
             document.getElementById('valorServico').value = servico.valorServico || '';
             document.getElementById('custoMateriais').value = servico.custoMateriais || '';
             document.getElementById('custoCombustivel').value = servico.custoCombustivel || '';
             document.getElementById('statusServico').value = servico.status || 'em-andamento';
             document.getElementById('statusPagamento').value = servico.statusPagamento || 'pendente';
+            document.getElementById('formaPagamento').value = servico.formaPagamento || '';
             document.getElementById('observacaoServico').value = servico.observacao || '';
             document.getElementById('servicoIdEdicao').value = servico.id;
+
+            // Atualizar preview
+            atualizarPreview();
 
             document.getElementById('servicoFormTitle').innerHTML = '<i class="fas fa-edit"></i> Editar Serviço (ID: ' + id + ')';
             document.getElementById('btnCadastrarServico').style.display = 'none';
             document.getElementById('btnSalvarEdicao').style.display = 'inline-flex';
             document.getElementById('btnCancelarEdicao').style.display = 'inline-flex';
-            
+
             mostrarNotificacao(`Modo de edição ativado para: ${servico.descricao}`, 'info');
-            // Rola para o topo para mostrar o formulário de edição
-            document.querySelector('.servicos-col-form').scrollIntoView({ behavior: 'smooth' });
         }
 
         function salvarEdicaoServico() {
             const id = parseInt(document.getElementById('servicoIdEdicao').value);
             const index = servicos.findIndex(s => s.id === id);
-
             if (index === -1) {
                 mostrarNotificacao('Erro: ID do serviço para edição não encontrado.', 'erro');
                 return;
@@ -1258,6 +1328,7 @@
             const custoCombustivel = parseFloat(document.getElementById('custoCombustivel').value) || 0;
             const status = document.getElementById('statusServico').value;
             const statusPagamento = document.getElementById('statusPagamento').value;
+            const formaPagamento = document.getElementById('formaPagamento').value;
             const observacao = document.getElementById('observacaoServico').value.trim();
 
             if (!descricao || !cliente || !dataInicio || valorServico <= 0) {
@@ -1265,400 +1336,553 @@
                 return;
             }
 
-            servicos[index] = {
-                ...servicos[index],
-                descricao,
-                cliente,
-                telefone,
-                dataInicio,
-                dataFim,
-                duracaoDias,
-                valorServico,
-                custoMateriais,
-                custoCombustivel,
-                status,
-                statusPagamento,
-                observacao
-            };
+            servicos[index].descricao = descricao;
+            servicos[index].cliente = cliente;
+            servicos[index].telefone = telefone;
+            servicos[index].dataInicio = dataInicio;
+            servicos[index].dataFim = dataFim;
+            servicos[index].duracaoDias = duracaoDias;
+            servicos[index].valorServico = valorServico;
+            servicos[index].custoMateriais = custoMateriais;
+            servicos[index].custoCombustivel = custoCombustivel;
+            servicos[index].status = status;
+            servicos[index].statusPagamento = statusPagamento;
+            servicos[index].formaPagamento = formaPagamento;
+            servicos[index].observacao = observacao;
 
             salvarDados();
-            limparFormularioServico(true);
             carregarServicos();
             atualizarDashboard();
-            mostrarNotificacao(`Serviço "${descricao}" editado com sucesso!`, 'sucesso');
+            limparFormularioServico(true);
+            mostrarNotificacao(`Serviço "${descricao}" atualizado com sucesso!`, 'sucesso');
         }
 
         // ========================================
         // DASHBOARD
         // ========================================
-        function gerarMetricas(data = servicos) {
-            const totais = data.reduce((acc, servico) => {
-                const lucro = calcularLucro(servico);
-                acc.totalServicos++;
-                acc.receitaTotal += servico.valorServico || 0;
-                acc.custoTotal += (servico.custoMateriais || 0) + (servico.custoCombustivel || 0);
-                acc.lucroLiquido += lucro;
+        function atualizarDashboard() {
+            const hoje = new Date();
+            const umaSemanaAtras = new Date(hoje.getTime() - (7 * 24 * 60 * 60 * 1000));
+            const umMesAtras = new Date(hoje.getFullYear(), hoje.getMonth() - 1, hoje.getDate());
 
-                if (servico.status === 'finalizado') {
-                    acc.servicosFinalizados++;
-                    if (servico.statusPagamento === 'pago') {
-                        acc.servicosPagos++;
-                    } 
-                } else if (servico.status === 'em-andamento') {
-                    acc.servicosEmAndamento++;
-                } else if (servico.status === 'cancelado') {
-                    acc.servicosCancelados++;
+            let totalHoje = { receita: 0, custos: 0, lucro: 0 };
+            let totalSemana = { receita: 0, custos: 0, lucro: 0 };
+            let totalMes = { receita: 0, custos: 0, lucro: 0 };
+            let totalGeral = { receita: 0, custos: 0, lucro: 0 };
+
+            let servicosFinalizados = 0;
+            let servicosAndamento = 0;
+            let servicosCancelados = 0;
+            let pagamentosPendentes = 0;
+            let valorPendente = 0;
+
+            servicos.forEach(servico => {
+                const dataServico = new Date(servico.dataInicio + 'T00:00:00');
+                const receita = servico.valorServico || 0;
+                const custos = (servico.custoMateriais || 0) + (servico.custoCombustivel || 0);
+                const lucro = receita - custos;
+
+                totalGeral.receita += receita;
+                totalGeral.custos += custos;
+                totalGeral.lucro += lucro;
+
+                if (servico.status === 'finalizado') servicosFinalizados++;
+                if (servico.status === 'em-andamento') servicosAndamento++;
+                if (servico.status === 'cancelado') servicosCancelados++;
+
+                if (servico.statusPagamento !== 'pago') {
+                    pagamentosPendentes++;
+                    valorPendente += receita;
                 }
 
-                if (servico.statusPagamento === 'pendente' || servico.statusPagamento === 'parcial') {
-                    acc.servicosPendentes++;
-                    acc.pendenciasFinanceiras += (servico.valorServico || 0); // Simplificado: considera o valor total pendente
-                    // Verifica se a data de fim (previsão) já passou e não está finalizado
-                    if (servico.dataFim && new Date(servico.dataFim + 'T00:00:00') < new Date(obterDataHojeISO() + 'T00:00:00') && servico.status !== 'finalizado' && servico.status !== 'cancelado') {
-                         acc.atrasos++;
-                    }
+                if (dataServico.toDateString() === hoje.toDateString()) {
+                    totalHoje.receita += receita;
+                    totalHoje.custos += custos;
+                    totalHoje.lucro += lucro;
                 }
-                
-                return acc;
-            }, {
-                totalServicos: 0,
-                receitaTotal: 0,
-                custoTotal: 0,
-                lucroLiquido: 0,
-                servicosFinalizados: 0,
-                servicosEmAndamento: 0,
-                servicosCancelados: 0,
-                servicosPagos: 0,
-                servicosPendentes: 0,
-                pendenciasFinanceiras: 0,
-                atrasos: 0
+
+                if (dataServico >= umaSemanaAtras) {
+                    totalSemana.receita += receita;
+                    totalSemana.custos += custos;
+                    totalSemana.lucro += lucro;
+                }
+
+                if (dataServico >= umMesAtras) {
+                    totalMes.receita += receita;
+                    totalMes.custos += custos;
+                    totalMes.lucro += lucro;
+                }
             });
 
-            totais.margemLucro = totais.receitaTotal > 0 ? (totais.lucroLiquido / totais.receitaTotal) * 100 : 0;
-            totais.receitaMedia = totais.totalServicos > 0 ? totais.receitaTotal / totais.totalServicos : 0;
-
-            return totais;
-        }
-
-        function atualizarDashboard() {
-            const metricas = gerarMetricas();
-            const dashboardGrid = document.getElementById('dashboardGrid');
-            const metricasGrid = document.getElementById('metricasGrid');
-
-            dashboardGrid.innerHTML = `
-                ${criarMetricCard('Receita Total', formatarMoeda(metricas.receitaTotal), 'fas fa-money-bill-wave')}
-                ${criarMetricCard('Custo Total', formatarMoeda(metricas.custoTotal), 'fas fa-truck-loading')}
-                ${criarMetricCard('Lucro Líquido', `<span class="${metricas.lucroLiquido >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(metricas.lucroLiquido)}</span>`, 'fas fa-hand-holding-usd')}
-                ${criarMetricCard('Margem de Lucro', `${metricas.margemLucro.toFixed(2)}%`, 'fas fa-percentage')}
-                ${criarMetricCard('Pendências Fin.', formatarMoeda(metricas.pendenciasFinanceiras), 'fas fa-exclamation-circle', '--danger')}
+            document.getElementById('dashboardGrid').innerHTML = `
+                <div class="metric-card" style="border-top-color: var(--primary);">
+                    <h3>LUCRO HOJE</h3>
+                    <div class="value ${totalHoje.lucro >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(totalHoje.lucro)}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: var(--success);">
+                    <h3>LUCRO SEMANAL</h3>
+                    <div class="value ${totalSemana.lucro >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(totalSemana.lucro)}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: var(--info);">
+                    <h3>LUCRO MENSAL</h3>
+                    <div class="value ${totalMes.lucro >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(totalMes.lucro)}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: #667eea;">
+                    <h3>LUCRO TOTAL</h3>
+                    <div class="value ${totalGeral.lucro >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(totalGeral.lucro)}</div>
+                </div>
+                
+                <div class="metric-card" style="border-top-color: #764ba2;">
+                    <h3>RECEITA TOTAL</h3>
+                    <div class="value">${formatarMoeda(totalGeral.receita)}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: var(--danger);">
+                    <h3>CUSTOS TOTAIS</h3>
+                    <div class="value">${formatarMoeda(totalGeral.custos)}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: var(--warning);">
+                    <h3>PENDENTES</h3>
+                    <div class="value">${formatarMoeda(valorPendente)}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: var(--purple);">
+                    <h3>PAG. PENDENTES</h3>
+                    <div class="value">${pagamentosPendentes}</div>
+                </div>
             `;
 
-            metricasGrid.innerHTML = `
-                ${criarMetricCard('Total de Serviços', metricas.totalServicos, 'fas fa-concierge-bell')}
-                ${criarMetricCard('Finalizados', metricas.servicosFinalizados, 'fas fa-check-circle', '--success')}
-                ${criarMetricCard('Em Andamento', metricas.servicosEmAndamento, 'fas fa-spinner', '--warning')}
-                ${criarMetricCard('Pagos', metricas.servicosPagos, 'fas fa-check', '--success')}
-                ${criarMetricCard('Pendentes (Pgto)', metricas.servicosPendentes, 'fas fa-clock', '--warning')}
-                ${criarMetricCard('Serviços em Atraso', metricas.atrasos, 'fas fa-times-circle', '--danger')}
+            document.getElementById('metricasGrid').innerHTML = `
+                <div class="metric-card" style="border-top-color: var(--success);">
+                    <h3>FINALIZADOS</h3>
+                    <div class="value">${servicosFinalizados}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: var(--warning);">
+                    <h3>EM ANDAMENTO</h3>
+                    <div class="value">${servicosAndamento}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: var(--danger);">
+                    <h3>CANCELADOS</h3>
+                    <div class="value">${servicosCancelados}</div>
+                </div>
+                <div class="metric-card" style="border-top-color: var(--primary);">
+                    <h3>TOTAL SERVIÇOS</h3>
+                    <div class="value">${servicos.length}</div>
+                </div>
             `;
 
             carregarServicosRecentes();
             carregarPendencias();
         }
 
-        function criarMetricCard(titulo, valor, icone, corVariavel = '--primary') {
-            // Pequena gambiarra para obter a cor CSS
-            const tempDiv = document.createElement('div');
-            tempDiv.style.color = corVariavel.startsWith('--') ? `var(${corVariavel})` : corVariavel;
-            document.body.appendChild(tempDiv);
-            const cor = window.getComputedStyle(tempDiv).color;
-            document.body.removeChild(tempDiv);
-
-            return `
-                <div class="metric-card" style="border-top-color: ${corVariavel.startsWith('--') ? `var(${corVariavel})` : corVariavel};">
-                    <h3 style="color: ${corVariavel.startsWith('--') ? `var(${corVariavel})` : corVariavel};"><i class="${icone}"></i> ${titulo}</h3>
-                    <div class="value">${valor}</div>
-                </div>
-            `;
-        }
-        
-        function abrirServicosEEditar(id) {
-            abrirTab('servicos');
-            setTimeout(() => editarServico(id), 100);
-        }
-
         function carregarServicosRecentes() {
             const lista = document.getElementById('listaServicosRecentes');
-            const recentes = [...servicos]
-                .sort((a, b) => b.id - a.id)
+            
+            const servicosRecentes = [...servicos]
+                .sort((a, b) => new Date(b.dataInicio) - new Date(a.dataInicio))
                 .slice(0, 5);
 
-            if (recentes.length === 0) {
+            if (servicosRecentes.length === 0) {
                 lista.innerHTML = '<p style="text-align: center; color: #6b7280;">Nenhum serviço cadastrado.</p>';
                 return;
             }
 
-            lista.innerHTML = recentes.map(servico => {
-                const statusClass = servico.status;
-                const statusText = {
-                    'em-andamento': 'Em Andamento',
-                    'finalizado': 'Finalizado',
-                    'cancelado': 'Cancelado'
-                }[servico.status] || 'Desconhecido';
-                const statusColor = statusClass === 'finalizado' ? 'var(--success)' : statusClass === 'em-andamento' ? 'var(--warning)' : 'var(--danger)';
-                const pagamentoText = servico.statusPagamento === 'pago' ? 'Pago' : servico.statusPagamento === 'parcial' ? 'Parcial' : 'Pendente';
-                const pagamentoColor = servico.statusPagamento === 'pago' ? 'var(--success)' : 'var(--warning)';
-
+            lista.innerHTML = servicosRecentes.map(servico => {
+                const lucro = calcularLucro(servico);
+                const pagamentoClass = servico.statusPagamento === 'pago' ? 'pago' : '';
                 return `
-                    <div class="servico-item ${statusClass}" style="border-left-color: ${statusColor};" onclick="abrirServicosEEditar(${servico.id})">
+                    <div class="servico-item ${servico.status} ${pagamentoClass}" onclick="editarServico(${servico.id})">
                         <div>
-                            <strong>${servico.descricao}</strong> - ${servico.cliente}
-                            <div style="font-size: 11px; color: #6b7280; margin-top: 2px;">
-                                ${formatarData(servico.dataInicio)} | ${formatarMoeda(servico.valorServico)}
-                            </div>
-                        </div>
-                        <div>
-                            <span class="status-badge status-${statusClass}">${statusText}</span>
-                            <span class="pagamento-badge" style="background: ${pagamentoColor}30; color: ${pagamentoColor};">${pagamentoText}</span>
+                            <strong>${servico.descricao}</strong>
+                            <br>
+                            <small>${servico.cliente} - ${formatarData(servico.dataInicio)}</small>
+                            <br>
+                            <small>Lucro: <span class="${lucro >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(lucro)}</span></small>
                         </div>
                     </div>
                 `;
             }).join('');
         }
-        
+
         function carregarPendencias() {
             const lista = document.getElementById('listaPendencias');
-            const dataHoje = obterDataHojeISO() + 'T00:00:00';
             
             const pendencias = servicos.filter(servico => 
-                servico.status === 'em-andamento' || 
-                (servico.status === 'finalizado' && (servico.statusPagamento === 'pendente' || servico.statusPagamento === 'parcial')) ||
-                (servico.dataFim && new Date(servico.dataFim + 'T00:00:00') < new Date(dataHoje) && servico.status !== 'finalizado' && servico.status !== 'cancelado') // Atraso na entrega
-            ).sort((a, b) => {
-                // Ordena por data de fim mais próxima
-                if (a.dataFim && b.dataFim) return new Date(a.dataFim + 'T00:00:00') - new Date(b.dataFim + 'T00:00:00');
-                if (a.dataFim) return -1;
-                if (b.dataFim) return 1;
-                return 0;
-            }).slice(0, 5);
+                servico.statusPagamento !== 'pago' && servico.status !== 'cancelado'
+            ).slice(0, 5);
 
             if (pendencias.length === 0) {
-                lista.innerHTML = '<p style="text-align: center; color: var(--success);">🎉 Nenhuma pendência crítica!</p>';
+                lista.innerHTML = '<p style="text-align: center; color: #6b7280;">Nenhuma pendência encontrada.</p>';
                 return;
             }
 
             lista.innerHTML = pendencias.map(servico => {
-                let icone = '';
-                let texto = '';
-                let cor = 'var(--warning)';
-                let dataInfo = servico.dataFim ? formatarData(servico.dataFim) : 'S/ Data';
-
-                if (servico.status === 'em-andamento') {
-                    icone = 'fas fa-spinner';
-                    texto = 'Em Andamento';
-                }
-                
-                if (servico.statusPagamento !== 'pago' && servico.status === 'finalizado') {
-                    icone = 'fas fa-money-bill-wave-alt';
-                    texto = `Pagamento ${servico.statusPagamento === 'parcial' ? 'Parcial' : 'Pendente'}`;
-                    cor = 'var(--warning)';
-                    if(servico.statusPagamento === 'pendente') {
-                       dataInfo = formatarMoeda(servico.valorServico); 
-                    }
-                }
-
-                if (servico.dataFim && new Date(servico.dataFim + 'T00:00:00') < new Date(dataHoje) && servico.status !== 'finalizado' && servico.status !== 'cancelado') {
-                    icone = 'fas fa-calendar-times';
-                    texto = 'Prazo Atrasado!';
-                    cor = 'var(--danger)';
-                    dataInfo = formatarData(servico.dataFim);
-                }
-                
-                // Prioridade para Atraso na entrega
-                if (servico.dataFim && new Date(servico.dataFim + 'T00:00:00') < new Date(dataHoje) && servico.status !== 'finalizado' && servico.status !== 'cancelado') {
-                    icone = 'fas fa-calendar-times';
-                    texto = 'Prazo Atrasado!';
-                    cor = 'var(--danger)';
-                    dataInfo = formatarData(servico.dataFim);
-                }
-
-
                 return `
-                    <div class="servico-item" style="border-left-color: ${cor}; cursor: pointer;" onclick="abrirServicosEEditar(${servico.id})">
+                    <div class="servico-item em-andamento" onclick="editarServico(${servico.id})">
                         <div>
-                            <strong><i class="${icone}"></i> ${texto}</strong>
-                            <div style="font-size: 11px; color: #6b7280; margin-top: 2px;">
-                                ${servico.descricao} (${servico.cliente})
-                            </div>
+                            <strong>${servico.cliente}</strong>
+                            <br>
+                            <small>${servico.descricao}</small>
+                            <br>
+                            <small>Valor: ${formatarMoeda(servico.valorServico)}</small>
                         </div>
-                        <span style="font-weight: 600; color: ${cor};">${dataInfo}</span>
                     </div>
                 `;
             }).join('');
         }
 
         // ========================================
-        // RELATÓRIOS E GRÁFICOS
+        // RELATÓRIOS MELHORADOS
         // ========================================
-        function renderizarGraficos(dados) {
-            // Destruir instâncias antigas
-            if (chartStatusInstance) chartStatusInstance.destroy();
-            if (chartLucroInstance) chartLucroInstance.destroy();
-            if (chartReceitaCustosInstance) chartReceitaCustosInstance.destroy();
-            if (chartEvolucaoInstance) chartEvolucaoInstance.destroy();
-
-            // GRÁFICO 1: Distribuição por Status
-            const statusCount = dados.reduce((acc, s) => {
-                acc[s.status] = (acc[s.status] || 0) + 1;
-                return acc;
-            }, {});
-
-            chartStatusInstance = new Chart(document.getElementById('chartStatus').getContext('2d'), {
-                type: 'pie',
-                data: {
-                    labels: ['Finalizado', 'Em Andamento', 'Cancelado'],
-                    datasets: [{
-                        data: [
-                            statusCount['finalizado'] || 0,
-                            statusCount['em-andamento'] || 0,
-                            statusCount['cancelado'] || 0
-                        ],
-                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'right' } }
-                }
-            });
-
-            // GRÁFICO 2: Lucro por Serviço (Top 10)
-            const topLucro = [...dados]
-                .filter(s => s.status !== 'cancelado')
-                .sort((a, b) => calcularLucro(b) - calcularLucro(a))
-                .slice(0, 10);
-
-            chartLucroInstance = new Chart(document.getElementById('chartLucro').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: topLucro.map(s => `${s.cliente.split(' ')[0]} - ${s.descricao.substring(0, 10)}...`),
-                    datasets: [{
-                        label: 'Lucro Líquido (R$)',
-                        data: topLucro.map(calcularLucro),
-                        backgroundColor: topLucro.map(s => calcularLucro(s) >= 0 ? '#10b981' : '#ef4444'),
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } },
-                    plugins: { legend: { display: false } }
-                }
-            });
-            
-            // GRÁFICO 3: Receita vs Custos
-            const metricas = gerarMetricas(dados);
-            chartReceitaCustosInstance = new Chart(document.getElementById('chartReceitaCustos').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: ['Financeiro'],
-                    datasets: [
-                        { label: 'Receita Total', data: [metricas.receitaTotal], backgroundColor: '#3b82f6' },
-                        { label: 'Custo Total', data: [metricas.custoTotal], backgroundColor: '#ef4444' },
-                        { label: 'Lucro Líquido', data: [metricas.lucroLiquido], backgroundColor: '#10b981' },
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
-            
-            // GRÁFICO 4: Evolução Mensal (Receita/Lucro)
-            const evolucaoMensal = dados.reduce((acc, s) => {
-                if (s.dataInicio) {
-                    const date = new Date(s.dataInicio + 'T00:00:00');
-                    // Garante que o mês e o ano são os mesmos, independentemente do fuso horário
-                    const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`; 
-                    
-                    if (!acc[monthKey]) acc[monthKey] = { receita: 0, custo: 0, lucro: 0, label: date.toLocaleString('pt-BR', { year: 'numeric', month: 'short' }) };
-                    
-                    acc[monthKey].receita += s.valorServico || 0;
-                    acc[monthKey].custo += (s.custoMateriais || 0) + (s.custoCombustivel || 0);
-                    acc[monthKey].lucro += calcularLucro(s);
-                }
-                return acc;
-            }, {});
-            
-            const mesesOrdenados = Object.keys(evolucaoMensal).sort();
-            const labelsEvolucao = mesesOrdenados.map(key => evolucaoMensal[key].label);
-            const receitaData = mesesOrdenados.map(key => evolucaoMensal[key].receita);
-            const lucroData = mesesOrdenados.map(key => evolucaoMensal[key].lucro);
-
-            chartEvolucaoInstance = new Chart(document.getElementById('chartEvolucao').getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: labelsEvolucao,
-                    datasets: [
-                        { label: 'Receita (R$)', data: receitaData, borderColor: '#3b82f6', tension: 0.1, fill: false },
-                        { label: 'Lucro (R$)', data: lucroData, borderColor: '#10b981', tension: 0.1, fill: false }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
-        }
         
-        function mostrarAnaliseFinanceira() {
-            const analiseDiv = document.getElementById('analiseFinanceira');
-            analiseDiv.style.display = 'block';
+        // Função para calcular métricas avançadas
+        function calcularMetricasAvancadas(servicosFiltrados = servicos) {
+            let metrics = {
+                receitaTotal: 0,
+                custosTotais: 0,
+                lucroTotal: 0,
+                servicosFinalizados: 0,
+                servicosAndamento: 0,
+                servicosCancelados: 0,
+                pagamentosPendentes: 0,
+                valorPendente: 0,
+                servicosPagos: 0,
+                valorRecebido: 0,
+                mediaLucro: 0,
+                maiorLucro: 0,
+                menorLucro: 0,
+                taxaConversao: 0,
+                tempoMedioExecucao: 0
+            };
+
+            let temposExecucao = [];
+
+            servicosFiltrados.forEach(servico => {
+                const receita = servico.valorServico || 0;
+                const custos = (servico.custoMateriais || 0) + (servico.custoCombustivel || 0);
+                const lucro = receita - custos;
+
+                metrics.receitaTotal += receita;
+                metrics.custosTotais += custos;
+                metrics.lucroTotal += lucro;
+
+                if (servico.status === 'finalizado') metrics.servicosFinalizados++;
+                if (servico.status === 'em-andamento') metrics.servicosAndamento++;
+                if (servico.status === 'cancelado') metrics.servicosCancelados++;
+
+                if (servico.statusPagamento === 'pago') {
+                    metrics.servicosPagos++;
+                    metrics.valorRecebido += receita;
+                } else {
+                    metrics.pagamentosPendentes++;
+                    metrics.valorPendente += receita;
+                }
+
+                if (lucro > metrics.maiorLucro) metrics.maiorLucro = lucro;
+                if (lucro < metrics.menorLucro || metrics.menorLucro === 0) metrics.menorLucro = lucro;
+
+                // Calcular tempo de execução
+                if (servico.dataInicio && servico.dataFim && servico.status === 'finalizado') {
+                    const duracao = calcularDuracaoDias(servico.dataInicio, servico.dataFim);
+                    temposExecucao.push(duracao);
+                }
+            });
+
+            // Cálculos derivados
+            const totalServicos = servicosFiltrados.length;
+            metrics.mediaLucro = totalServicos > 0 ? metrics.lucroTotal / totalServicos : 0;
+            metrics.taxaConversao = totalServicos > 0 ? (metrics.servicosFinalizados / totalServicos) * 100 : 0;
+            metrics.tempoMedioExecucao = temposExecucao.length > 0 ? 
+                temposExecucao.reduce((a, b) => a + b, 0) / temposExecucao.length : 0;
+
+            return metrics;
+        }
+
+        // Função para gerar relatório completo melhorado
+        function gerarRelatorioCompletoPDF() {
+            const dataInicio = document.getElementById('dataInicioRelatorioCompleto').value;
+            const dataFim = document.getElementById('dataFimRelatorioCompleto').value;
+
+            let servicosFiltrados = servicos;
+            if (dataInicio && dataFim) {
+                servicosFiltrados = servicos.filter(servico => {
+                    const dataServico = new Date(servico.dataInicio);
+                    const inicio = new Date(dataInicio);
+                    const fim = new Date(dataFim);
+                    return dataServico >= inicio && dataServico <= fim;
+                });
+            }
+
+            if (servicosFiltrados.length === 0) {
+                mostrarNotificacao('Nenhum serviço encontrado para o período selecionado.', 'info');
+                return;
+            }
+
+            mostrarNotificacao('Gerando relatório completo...', 'info');
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4');
+            const dataHoraAtual = new Date().toLocaleString('pt-BR');
+            const metrics = calcularMetricasAvancadas(servicosFiltrados);
+
+            // Cabeçalho
+            doc.setFontSize(20);
+            doc.setTextColor(16, 185, 129);
+            doc.text("RELATÓRIO COMPLETO - CONTROLSERV", 20, 20);
             
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text(`Período: ${dataInicio ? formatarData(dataInicio) + ' a ' + formatarData(dataFim) : 'Todos os períodos'}`, 20, 30);
+            doc.text(`Gerado em: ${dataHoraAtual}`, 250, 20, { align: "right" });
+            doc.text("Juniorxam Tecnologia", 250, 25, { align: "right" });
+
+            // Métricas Principais
+            doc.setFontSize(14);
+            doc.setTextColor(40);
+            doc.text("MÉTRICAS PRINCIPAIS", 20, 45);
+
+            let yPos = 55;
+            doc.setFontSize(9);
+            doc.text(`Receita Total: ${formatarMoeda(metrics.receitaTotal)}`, 20, yPos);
+            doc.text(`Custos Totais: ${formatarMoeda(metrics.custosTotais)}`, 20, yPos + 6);
+            doc.text(`Lucro Total: ${formatarMoeda(metrics.lucroTotal)}`, 20, yPos + 12);
+            doc.text(`Margem de Lucro: ${metrics.receitaTotal > 0 ? ((metrics.lucroTotal / metrics.receitaTotal) * 100).toFixed(1) + '%' : '0%'}`, 20, yPos + 18);
+
+            doc.text(`Serviços Finalizados: ${metrics.servicosFinalizados}`, 100, yPos);
+            doc.text(`Serviços em Andamento: ${metrics.servicosAndamento}`, 100, yPos + 6);
+            doc.text(`Serviços Cancelados: ${metrics.servicosCancelados}`, 100, yPos + 12);
+            doc.text(`Taxa de Conversão: ${metrics.taxaConversao.toFixed(1)}%`, 100, yPos + 18);
+
+            doc.text(`Pagamentos Pendentes: ${metrics.pagamentosPendentes}`, 180, yPos);
+            doc.text(`Valor Pendente: ${formatarMoeda(metrics.valorPendente)}`, 180, yPos + 6);
+            doc.text(`Tempo Médio Execução: ${metrics.tempoMedioExecucao.toFixed(1)} dias`, 180, yPos + 12);
+            doc.text(`Lucro Médio por Serviço: ${formatarMoeda(metrics.mediaLucro)}`, 180, yPos + 18);
+
+            // Tabela de Serviços
+            const servicosColumns = [
+                "ID", "Descrição", "Cliente", "Início", "Fim", 
+                "Valor", "Custos", "Lucro", "Status", "Pagamento"
+            ];
+            
+            const servicosData = servicosFiltrados.map(s => {
+                const custos = (s.custoMateriais || 0) + (s.custoCombustivel || 0);
+                const lucro = calcularLucro(s);
+                return [
+                    s.id,
+                    s.descricao.length > 20 ? s.descricao.substring(0, 20) + '...' : s.descricao,
+                    s.cliente.length > 15 ? s.cliente.substring(0, 15) + '...' : s.cliente,
+                    formatarData(s.dataInicio),
+                    s.dataFim ? formatarData(s.dataFim) : 'N/A',
+                    formatarMoeda(s.valorServico),
+                    formatarMoeda(custos),
+                    formatarMoeda(lucro),
+                    s.status === 'finalizado' ? 'Finalizado' : s.status === 'em-andamento' ? 'Em Andamento' : 'Cancelado',
+                    s.statusPagamento === 'pago' ? 'Pago' : s.statusPagamento === 'parcial' ? 'Parcial' : 'Pendente'
+                ];
+            });
+
+            doc.autoTable({
+                startY: 75,
+                head: [servicosColumns],
+                body: servicosData,
+                styles: { 
+                    fontSize: 7,
+                    cellPadding: 1.5,
+                },
+                headStyles: { 
+                    fillColor: [16, 185, 129],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                theme: 'grid'
+            });
+
+            // Análise de Performance
+            const finalY = doc.lastAutoTable.finalY + 10;
+            doc.setFontSize(12);
+            doc.text("ANÁLISE DE PERFORMANCE", 20, finalY);
+
+            doc.setFontSize(9);
+            doc.text(`Maior Lucro: ${formatarMoeda(metrics.maiorLucro)}`, 20, finalY + 8);
+            doc.text(`Menor Lucro: ${formatarMoeda(metrics.menorLucro)}`, 20, finalY + 16);
+            doc.text(`Valor Total Recebido: ${formatarMoeda(metrics.valorRecebido)}`, 20, finalY + 24);
+            doc.text(`Eficiência Operacional: ${metrics.taxaConversao.toFixed(1)}%`, 20, finalY + 32);
+
+            const fileName = dataInicio ? 
+                `Relatorio_Completo_${dataInicio}_a_${dataFim}.pdf` : 
+                'Relatorio_Completo_Geral.pdf';
+
+            doc.save(fileName);
+            mostrarNotificacao('Relatório completo gerado com sucesso!', 'sucesso');
+        }
+
+        // Função para análise financeira em tempo real
+        function mostrarAnaliseFinanceira() {
+            document.getElementById('analiseFinanceira').style.display = 'block';
             atualizarAnaliseFinanceira();
-            mostrarNotificacao('Análise Financeira em tela carregada!', 'info');
-            // Rola para a seção de análise
-            analiseDiv.scrollIntoView({ behavior: 'smooth' });
         }
 
         function atualizarAnaliseFinanceira() {
-            const metricas = gerarMetricas();
-            const metricasTempoReal = document.getElementById('metricasTempoReal');
-            
-            metricasTempoReal.innerHTML = `
-                ${criarMetricaRelatorio('Receita Total', formatarMoeda(metricas.receitaTotal), 'var(--info)')}
-                ${criarMetricaRelatorio('Custo Total', formatarMoeda(metricas.custoTotal), 'var(--danger)')}
-                ${criarMetricaRelatorio('Lucro Líquido', `<span class="${metricas.lucroLiquido >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(metricas.lucroLiquido)}</span>`, 'var(--success)')}
-                ${criarMetricaRelatorio('Total de Serviços', metricas.totalServicos, 'var(--primary)')}
-            `;
-            
-            renderizarGraficos(servicos);
-        }
+            const metrics = calcularMetricasAvancadas();
 
-        function criarMetricaRelatorio(titulo, valor, cor) {
-            return `
-                <div class="metrica-item" style="border-left-color: ${cor};">
-                    <div class="metrica-label">${titulo}</div>
-                    <div class="metrica-valor">${valor}</div>
+            // Atualizar métricas em tempo real
+            document.getElementById('metricasTempoReal').innerHTML = `
+                <div class="metrica-item">
+                    <div class="metrica-label">Receita Total</div>
+                    <div class="metrica-valor">${formatarMoeda(metrics.receitaTotal)}</div>
+                </div>
+                <div class="metrica-item">
+                    <div class="metrica-label">Lucro Total</div>
+                    <div class="metrica-valor ${metrics.lucroTotal >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">${formatarMoeda(metrics.lucroTotal)}</div>
+                </div>
+                <div class="metrica-item">
+                    <div class="metrica-label">Margem de Lucro</div>
+                    <div class="metrica-valor ${metrics.lucroTotal >= 0 ? 'lucro-positivo' : 'lucro-negativo'}">
+                        ${metrics.receitaTotal > 0 ? ((metrics.lucroTotal / metrics.receitaTotal) * 100).toFixed(1) + '%' : '0%'}
+                    </div>
+                </div>
+                <div class="metrica-item">
+                    <div class="metrica-label">Taxa de Conversão</div>
+                    <div class="metrica-valor">${metrics.taxaConversao.toFixed(1)}%</div>
                 </div>
             `;
-        }
-        
-        const { jsPDF } = window.jspdf;
 
-        function configurarPDF(doc, titulo) {
-            doc.setFontSize(18);
-            doc.setTextColor(31, 41, 55); // #1f2937
-            doc.text(`ControlServ - ${titulo}`, doc.internal.pageSize.width / 2, 20, { align: 'center' });
+            // Atualizar gráficos
+            atualizarGraficos();
+        }
+
+        function atualizarGraficos() {
+            const metrics = calcularMetricasAvancadas();
+
+            // Gráfico de Status
+            const ctxStatus = document.getElementById('chartStatus').getContext('2d');
+            new Chart(ctxStatus, {
+                type: 'pie',
+                data: {
+                    labels: ['Finalizados', 'Em Andamento', 'Cancelados'],
+                    datasets: [{
+                        data: [metrics.servicosFinalizados, metrics.servicosAndamento, metrics.servicosCancelados],
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de Lucro (Top 10)
+            const servicosLucrativos = [...servicos]
+                .sort((a, b) => calcularLucro(b) - calcularLucro(a))
+                .slice(0, 10);
+
+            const ctxLucro = document.getElementById('chartLucro').getContext('2d');
+            new Chart(ctxLucro, {
+                type: 'bar',
+                data: {
+                    labels: servicosLucrativos.map(s => s.descricao.substring(0, 20) + (s.descricao.length > 20 ? '...' : '')),
+                    datasets: [{
+                        label: 'Lucro (R$)',
+                        data: servicosLucrativos.map(s => calcularLucro(s)),
+                        backgroundColor: servicosLucrativos.map(s => calcularLucro(s) >= 0 ? '#10b981' : '#ef4444')
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Gráfico Receita vs Custos
+            const ctxReceitaCustos = document.getElementById('chartReceitaCustos').getContext('2d');
+            new Chart(ctxReceitaCustos, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Receita', 'Custos'],
+                    datasets: [{
+                        data: [metrics.receitaTotal, metrics.custosTotais],
+                        backgroundColor: ['#10b981', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de Evolução Mensal
+            const evolucaoMensal = calcularEvolucaoMensal();
+            const ctxEvolucao = document.getElementById('chartEvolucao').getContext('2d');
+            new Chart(ctxEvolucao, {
+                type: 'line',
+                data: {
+                    labels: evolucaoMensal.map(item => item.mes),
+                    datasets: [{
+                        label: 'Receita Mensal',
+                        data: evolucaoMensal.map(item => item.receita),
+                        borderColor: '#10b981',
+                        tension: 0.1
+                    }, {
+                        label: 'Lucro Mensal',
+                        data: evolucaoMensal.map(item => item.lucro),
+                        borderColor: '#3b82f6',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function calcularEvolucaoMensal() {
+            const meses = {};
             
-            doc.setFontSize(10);
-            doc.setTextColor(107, 114, 128); // #6b7280
-            doc.text(`Relatório gerado em: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`, doc.internal.pageSize.width / 2, 27, { align: 'center' });
-            return doc;
+            servicos.forEach(servico => {
+                if (servico.dataInicio) {
+                    const data = new Date(servico.dataInicio);
+                    const mesAno = `${data.getMonth() + 1}/${data.getFullYear()}`;
+                    
+                    if (!meses[mesAno]) {
+                        meses[mesAno] = { receita: 0, lucro: 0 };
+                    }
+                    
+                    meses[mesAno].receita += servico.valorServico || 0;
+                    meses[mesAno].lucro += calcularLucro(servico);
+                }
+            });
+
+            // Ordenar por data
+            return Object.entries(meses)
+                .sort((a, b) => {
+                    const [mesA, anoA] = a[0].split('/').map(Number);
+                    const [mesB, anoB] = b[0].split('/').map(Number);
+                    return new Date(anoA, mesA - 1) - new Date(anoB, mesB - 1);
+                })
+                .map(([mes, dados]) => ({
+                    mes,
+                    receita: dados.receita,
+                    lucro: dados.lucro
+                }));
+        }
+
+        function gerarRelatorioFinanceiroPDF() {
+            mostrarNotificacao('Use o Relatório Completo para análise financeira detalhada.', 'info');
         }
 
         function gerarRelatorioPeriodoPDF() {
@@ -1670,260 +1894,42 @@
                 return;
             }
 
-            const servicosFiltrados = servicos.filter(s => s.dataInicio >= dataInicio && s.dataInicio <= dataFim);
-
-            if (servicosFiltrados.length === 0) {
-                mostrarNotificacao('Nenhum serviço encontrado para o período selecionado.', 'erro');
-                return;
-            }
-
-            const doc = new jsPDF('p', 'mm', 'a4');
-            configurarPDF(doc, `Relatório por Período: ${formatarData(dataInicio)} a ${formatarData(dataFim)}`);
-            
-            let finalY = 35;
-
-            // Métricas
-            const metricas = gerarMetricas(servicosFiltrados);
-            doc.setFontSize(12);
-            doc.setTextColor(31, 41, 55);
-            doc.text(`Resumo Financeiro (Total: ${servicosFiltrados.length} serviços)`, 14, finalY);
-            finalY += 5;
-            
-            const resumoData = [
-                ['Receita Total', 'Custo Total', 'Lucro Líquido', 'Margem de Lucro'],
-                [
-                    formatarMoeda(metricas.receitaTotal),
-                    formatarMoeda(metricas.custoTotal),
-                    formatarMoeda(metricas.lucroLiquido),
-                    `${metricas.margemLucro.toFixed(2)}%`
-                ]
-            ];
-            
-            doc.autoTable({
-                head: [resumoData[0]],
-                body: [resumoData[1]],
-                startY: finalY,
-                styles: { fontSize: 10, cellPadding: 2, halign: 'center' },
-                headStyles: { fillColor: '#10b981' }
-            });
-            finalY = doc.autoTable.previous.finalY + 10;
-            
-            // Tabela de Serviços
-            doc.setFontSize(12);
-            doc.text('Lista de Serviços Detalhados:', 14, finalY);
-            finalY += 5;
-
-            const tableColumn = ["ID", "Descrição", "Cliente", "Valor (R$)", "Custo (R$)", "Lucro (R$)", "Status", "Pgto"];
-            const tableRows = servicosFiltrados.map(s => [
-                s.id,
-                s.descricao.substring(0, 30),
-                s.cliente,
-                (s.valorServico || 0).toFixed(2).replace('.', ','),
-                ((s.custoMateriais || 0) + (s.custoCombustivel || 0)).toFixed(2).replace('.', ','),
-                calcularLucro(s).toFixed(2).replace('.', ','),
-                s.status === 'finalizado' ? 'Finalizado' : s.status === 'em-andamento' ? 'Em Andamento' : 'Cancelado',
-                s.statusPagamento === 'pago' ? 'Pago' : 'Pendente'
-            ]);
-
-            doc.autoTable(tableColumn, tableRows, { 
-                startY: finalY,
-                styles: { fontSize: 8, cellPadding: 1, overflow: 'ellipsize', maxWidth: 'col', halign: 'left' },
-                headStyles: { fillColor: '#f59e0b' }
-            });
-
-            doc.save(`Relatorio_Periodo_${dataInicio}_${dataFim}.pdf`);
-            mostrarNotificacao('Relatório do Período gerado com sucesso!', 'sucesso');
-        }
-
-        function gerarRelatorioFinanceiroPDF() {
-            const doc = new jsPDF('p', 'mm', 'a4');
-            configurarPDF(doc, 'Relatório Financeiro Detalhado');
-            
-            let finalY = 35;
-            const metricas = gerarMetricas();
-
-            // Resumo
-            doc.setFontSize(12);
-            doc.setTextColor(31, 41, 55);
-            doc.text('Resumo Financeiro Total', 14, finalY);
-            finalY += 5;
-
-            const resumoData = [
-                ['Receita Total', 'Custo Total', 'Lucro Líquido', 'Margem de Lucro', 'Pendências Fin.'],
-                [
-                    formatarMoeda(metricas.receitaTotal),
-                    formatarMoeda(metricas.custoTotal),
-                    formatarMoeda(metricas.lucroLiquido),
-                    `${metricas.margemLucro.toFixed(2)}%`,
-                    formatarMoeda(metricas.pendenciasFinanceiras)
-                ]
-            ];
-            
-            doc.autoTable({
-                head: [resumoData[0]],
-                body: [resumoData[1]],
-                startY: finalY,
-                styles: { fontSize: 10, cellPadding: 2, halign: 'center' },
-                headStyles: { fillColor: '#3b82f6' }
-            });
-            finalY = doc.autoTable.previous.finalY + 10;
-            
-            // Top Lucro
-            const topLucro = [...servicos]
-                .filter(s => s.status !== 'cancelado')
-                .sort((a, b) => calcularLucro(b) - calcularLucro(a))
-                .slice(0, 5);
-
-            if (topLucro.length > 0) {
-                doc.setFontSize(12);
-                doc.text('Top 5 Serviços por Lucro', 14, finalY);
-                finalY += 5;
-                
-                const lucroHeaders = ["Descrição", "Cliente", "Valor", "Custo Total", "Lucro"];
-                const lucroRows = topLucro.map(s => [
-                    s.descricao.substring(0, 40),
-                    s.cliente,
-                    formatarMoeda(s.valorServico),
-                    formatarMoeda((s.custoMateriais || 0) + (s.custoCombustivel || 0)),
-                    formatarMoeda(calcularLucro(s))
-                ]);
-
-                doc.autoTable(lucroHeaders, lucroRows, {
-                    startY: finalY,
-                    styles: { fontSize: 9, cellPadding: 1, halign: 'left' },
-                    headStyles: { fillColor: '#8b5cf6' }
-                });
-                finalY = doc.autoTable.previous.finalY + 10;
-            }
-
-            // Pagamentos Pendentes
-            const pendentes = servicos.filter(s => s.statusPagamento !== 'pago' && s.status !== 'cancelado');
-            if (pendentes.length > 0) {
-                doc.setFontSize(12);
-                doc.text('Serviços com Pagamento Pendente/Parcial', 14, finalY);
-                finalY += 5;
-                
-                const pendentesHeaders = ["Descrição", "Cliente", "Status Pgto", "Valor", "Data Fim"];
-                const pendentesRows = pendentes.map(s => [
-                    s.descricao.substring(0, 40),
-                    s.cliente,
-                    s.statusPagamento === 'pendente' ? 'Pendente' : 'Parcial',
-                    formatarMoeda(s.valorServico),
-                    formatarData(s.dataFim)
-                ]);
-
-                doc.autoTable(pendentesHeaders, pendentesRows, {
-                    startY: finalY,
-                    styles: { fontSize: 9, cellPadding: 1, halign: 'left' },
-                    headStyles: { fillColor: '#f59e0b' }
-                });
-            }
-
-            doc.save('Relatorio_Financeiro.pdf');
-            mostrarNotificacao('Relatório Financeiro gerado com sucesso!', 'sucesso');
-        }
-
-        function gerarRelatorioCompletoPDF() {
-            const dataInicio = document.getElementById('dataInicioRelatorioCompleto').value;
-            const dataFim = document.getElementById('dataFimRelatorioCompleto').value;
-
-            const dadosFiltrados = servicos.filter(s => 
-                (!dataInicio || s.dataInicio >= dataInicio) && 
-                (!dataFim || s.dataInicio <= dataFim)
-            );
-
-            if (dadosFiltrados.length === 0) {
-                mostrarNotificacao('Nenhum serviço encontrado para o período selecionado.', 'erro');
-                return;
-            }
-
-            const doc = new jsPDF('p', 'mm', 'a4');
-            configurarPDF(doc, 'Relatório Completo Avançado');
-            
-            let finalY = 35;
-            const metricas = gerarMetricas(dadosFiltrados);
-
-            // Resumo
-            doc.setFontSize(12);
-            doc.setTextColor(31, 41, 55);
-            doc.text('Resumo e Métricas Principais', 14, finalY);
-            finalY += 5;
-
-            const resumoData = [
-                ['Receita Total', 'Custo Total', 'Lucro Líquido', 'Margem de Lucro'],
-                [formatarMoeda(metricas.receitaTotal), formatarMoeda(metricas.custoTotal), formatarMoeda(metricas.lucroLiquido), `${metricas.margemLucro.toFixed(2)}%`]
-            ];
-            
-            const metricasData = [
-                ['Total Serviços', 'Finalizados', 'Em Andamento', 'Cancelados', 'Pagos', 'Pendentes (Pgto)'],
-                [metricas.totalServicos, metricas.servicosFinalizados, metricas.servicosEmAndamento, metricas.servicosCancelados, metricas.servicosPagos, metricas.servicosPendentes]
-            ];
-            
-            doc.autoTable({
-                head: [resumoData[0]],
-                body: [resumoData[1]],
-                startY: finalY,
-                styles: { fontSize: 9, cellPadding: 2, halign: 'center' },
-                headStyles: { fillColor: '#ef4444' }
-            });
-            finalY = doc.autoTable.previous.finalY + 5;
-            
-            doc.autoTable({
-                head: [metricasData[0]],
-                body: [metricasData[1]],
-                startY: finalY,
-                styles: { fontSize: 9, cellPadding: 2, halign: 'center' },
-                headStyles: { fillColor: '#10b981' }
-            });
-            finalY = doc.autoTable.previous.finalY + 10;
-            
-            // Tabela Detalhada
-            doc.setFontSize(12);
-            doc.text('Lista de Serviços Detalhada:', 14, finalY);
-            finalY += 5;
-
-            const tableColumn = ["Descrição", "Cliente", "Início", "Valor", "Custo", "Lucro", "Status", "Pgto"];
-            const tableRows = dadosFiltrados.map(s => [
-                s.descricao.substring(0, 30),
-                s.cliente,
-                formatarData(s.dataInicio),
-                (s.valorServico || 0).toFixed(2).replace('.', ','),
-                ((s.custoMateriais || 0) + (s.custoCombustivel || 0)).toFixed(2).replace('.', ','),
-                calcularLucro(s).toFixed(2).replace('.', ','),
-                s.status === 'finalizado' ? 'Finalizado' : s.status === 'em-andamento' ? 'Andamento' : 'Cancelado',
-                s.statusPagamento === 'pago' ? 'Pago' : 'Pendente'
-            ]);
-
-            doc.autoTable(tableColumn, tableRows, { 
-                startY: finalY,
-                styles: { fontSize: 8, cellPadding: 1, overflow: 'ellipsize', maxWidth: 'col', halign: 'left' },
-                headStyles: { fillColor: '#8b5cf6' }
-            });
-
-            doc.save('Relatorio_Completo_ControlServ.pdf');
-            mostrarNotificacao('Relatório Completo gerado com sucesso!', 'sucesso');
+            // Reutiliza a lógica do relatório completo mas com filtro de período
+            document.getElementById('dataInicioRelatorioCompleto').value = dataInicio;
+            document.getElementById('dataFimRelatorioCompleto').value = dataFim;
+            gerarRelatorioCompletoPDF();
         }
 
         function gerarRelatorioCSV() {
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "ID;Descricao;Cliente;Telefone;Data Inicio;Data Fim;Duracao Dias;Valor Servico;Custo Materiais;Custo Combustivel;Lucro;Status;Status Pagamento;Observacoes\n";
+            mostrarNotificacao('Exportando dados para CSV...', 'info');
+            
+            const headers = [
+                "ID", "Descrição", "Cliente", "Telefone", "Data Início", "Data Fim", 
+                "Duração (dias)", "Valor Serviço", "Custo Materiais", "Custo Combustível", 
+                "Lucro", "Status", "Status Pagamento", "Forma Pagamento", "Observações"
+            ];
+            
+            let csvContent = headers.join(";") + "\n";
 
             servicos.forEach(servico => {
                 const lucro = calcularLucro(servico);
+                const duracao = servico.duracaoDias || calcularDuracaoDias(servico.dataInicio, servico.dataFim);
+
                 const row = [
                     servico.id,
                     `"${servico.descricao}"`,
                     `"${servico.cliente}"`,
                     `"${servico.telefone || ''}"`,
-                    servico.dataInicio,
-                    servico.dataFim || '',
-                    servico.duracaoDias || '',
+                    formatarData(servico.dataInicio),
+                    servico.dataFim ? formatarData(servico.dataFim) : '',
+                    duracao,
                     (servico.valorServico || 0).toFixed(2).replace('.', ','),
                     (servico.custoMateriais || 0).toFixed(2).replace('.', ','),
                     (servico.custoCombustivel || 0).toFixed(2).replace('.', ','),
                     lucro.toFixed(2).replace('.', ','),
                     servico.status === 'finalizado' ? 'Finalizado' : servico.status === 'em-andamento' ? 'Em Andamento' : 'Cancelado',
                     servico.statusPagamento === 'pago' ? 'Pago' : servico.statusPagamento === 'parcial' ? 'Parcial' : 'Pendente',
+                    servico.formaPagamento || '',
                     `"${servico.observacao || ''}"`
                 ];
                 csvContent += row.join(";") + "\n";
@@ -1945,27 +1951,25 @@
 
             mostrarNotificacao('Exportação para CSV concluída!', 'sucesso');
         }
-
+        
         // ========================================
-        // BACKUP E DADOS
+        // EXPORT/IMPORT/LIMPAR DADOS
         // ========================================
         function exportarDados() {
-            const dataStr = JSON.stringify(servicos, null, 2);
-            const blob = new Blob([dataStr], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
+            const dados = { servicos: servicos };
+            const jsonString = JSON.stringify(dados, null, 2);
+            
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonString);
             
             const now = new Date();
             const dateString = now.toISOString().split('T')[0].replace(/-/g, '_');
-            const exportFileDefaultName = `ControlServ_Backup_${dateString}.json`;
+            const exportFileDefaultName = `backup_servicos_${dateString}.json`;
 
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', url);
+            let linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
             linkElement.setAttribute('download', exportFileDefaultName);
-            document.body.appendChild(linkElement);
             linkElement.click();
-            document.body.removeChild(linkElement);
-
-            mostrarNotificacao('Backup (JSON) exportado com sucesso!', 'sucesso');
+            mostrarNotificacao('Backup exportado com sucesso!', 'sucesso');
         }
 
         function importarDados() {
@@ -1973,121 +1977,122 @@
             const file = fileInput.files[0];
 
             if (!file) {
-                mostrarNotificacao('Selecione um arquivo de backup (.json) para importar.', 'erro');
+                mostrarNotificacao('Selecione um arquivo JSON para importar.', 'erro');
                 return;
             }
 
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function(event) {
                 try {
-                    const importedData = JSON.parse(e.target.result);
-                    if (Array.isArray(importedData)) {
-                        servicos = importedData;
-                        salvarDados();
-                        carregarServicos();
-                        atualizarDashboard();
-                        mostrarNotificacao('Dados importados com sucesso!', 'sucesso');
-                        fileInput.value = ''; // Limpa o campo
-                    } else {
-                        mostrarNotificacao('Formato do arquivo inválido. Deve ser um array JSON.', 'erro');
+                    const data = JSON.parse(event.target.result);
+                    if (!data.servicos) {
+                        mostrarNotificacao('O arquivo JSON não está no formato esperado.', 'erro');
+                        return;
                     }
-                } catch (error) {
-                    mostrarNotificacao('Erro ao processar o arquivo JSON. Arquivo corrompido ou formato incorreto.', 'erro');
+                    if (confirm("ATENÇÃO: A importação irá SOBRESCREVER os dados atuais. Deseja continuar?")) {
+                        servicos = data.servicos;
+                        salvarDados();
+                        checkInitializers();
+                        mostrarNotificacao('Dados importados com sucesso!', 'sucesso');
+                    }
+                } catch (e) {
+                    mostrarNotificacao('Erro ao processar o arquivo. Certifique-se de que é um JSON válido.', 'erro');
                 }
             };
             reader.readAsText(file);
         }
 
         function limparDados() {
-            if (confirm('ATENÇÃO: Você tem certeza que deseja LIMPAR TODOS OS DADOS de serviços? Esta ação é irreversível.')) {
+            if (confirm("ATENÇÃO: Você tem certeza que deseja limpar TODOS os dados? Esta ação é irreversível.")) {
                 servicos = [];
-                localStorage.removeItem("servicos");
-                carregarServicos();
-                atualizarDashboard();
-                mostrarNotificacao('Todos os dados foram removidos!', 'danger');
+                salvarDados();
+                checkInitializers();
+                mostrarNotificacao('Todos os dados foram limpos com sucesso!', 'sucesso');
             }
         }
 
         function criarDadosExemplo() {
             const dataHoje = obterDataHojeISO();
-            const dataPassada = new Date();
-            dataPassada.setDate(dataPassada.getDate() - 15);
-            const dataPassadaISO = dataPassada.toISOString().split('T')[0];
-            
-            servicos = [
+            const servicosExemplo = [
                 {
-                    id: Date.now() + 1,
+                    id: 1001,
                     descricao: "Instalação de Câmeras de Segurança",
                     cliente: "João Silva",
-                    telefone: "11987654321",
-                    dataInicio: dataPassadaISO,
-                    dataFim: dataPassadaISO,
-                    duracaoDias: 1,
-                    valorServico: 1500.00,
-                    custoMateriais: 450.00,
-                    custoCombustivel: 25.00,
-                    status: "finalizado",
-                    statusPagamento: "pago",
-                    observacao: "Cliente satisfeito, sistema de alta resolução instalado."
-                },
-                {
-                    id: Date.now() + 2,
-                    descricao: "Manutenção de Cerca Elétrica",
-                    cliente: "Maria Oliveira",
-                    telefone: "11999998888",
-                    dataInicio: dataHoje,
-                    dataFim: '',
-                    duracaoDias: 2,
-                    valorServico: 450.00,
-                    custoMateriais: 80.00,
-                    custoCombustivel: 15.00,
-                    status: "em-andamento",
-                    statusPagamento: "pendente",
-                    observacao: "Aguardando peça de reposição para finalizar o serviço."
-                },
-                {
-                    id: Date.now() + 3,
-                    descricao: "Configuração de Rede",
-                    cliente: "Pedro Santos",
-                    telefone: "11977776666",
-                    dataInicio: dataPassadaISO,
-                    dataFim: dataPassadaISO,
-                    duracaoDias: 1,
-                    valorServico: 800.00,
-                    custoMateriais: 50.00,
-                    custoCombustivel: 0.00,
-                    status: "finalizado",
-                    statusPagamento: "parcial",
-                    observacao: "Recebeu 50% adiantado."
-                },
-                {
-                    id: Date.now() + 4,
-                    descricao: "Orçamento para Alarme",
-                    cliente: "Ana Costa",
-                    telefone: "",
+                    telefone: "11999999999",
                     dataInicio: dataHoje,
                     dataFim: dataHoje,
                     duracaoDias: 1,
-                    valorServico: 0.00,
-                    custoMateriais: 0.00,
-                    custoCombustivel: 5.00,
-                    status: "cancelado",
+                    valorServico: 1200.00,
+                    custoMateriais: 450.00,
+                    custoCombustivel: 35.00,
+                    status: "finalizado",
+                    statusPagamento: "pago",
+                    formaPagamento: "pix",
+                    observacao: "4 câmeras instaladas na residência",
+                    dataCadastro: dataHoje
+                },
+                {
+                    id: 1002,
+                    descricao: "Instalação de Cerca Elétrica",
+                    cliente: "Maria Oliveira",
+                    telefone: "11988888888",
+                    dataInicio: dataHoje,
+                    dataFim: '2024-03-20',
+                    duracaoDias: 3,
+                    valorServico: 800.00,
+                    custoMateriais: 280.00,
+                    custoCombustivel: 25.00,
+                    status: "em-andamento",
                     statusPagamento: "pendente",
-                    observacao: "Cliente desistiu após o orçamento."
+                    formaPagamento: "dinheiro",
+                    observacao: "50 metros de cerca - finalizar amanhã",
+                    dataCadastro: dataHoje
+                },
+                {
+                    id: 1003,
+                    descricao: "Manutenção de Portão Eletrônico",
+                    cliente: "Carlos Souza",
+                    telefone: "11977777777",
+                    dataInicio: '2024-02-15',
+                    dataFim: '2024-02-15',
+                    duracaoDias: 1,
+                    valorServico: 350.00,
+                    custoMateriais: 120.00,
+                    custoCombustivel: 20.00,
+                    status: "finalizado",
+                    statusPagamento: "pago",
+                    formaPagamento: "cartao-debito",
+                    observacao: "Troca de motor do portão",
+                    dataCadastro: '2024-02-15'
                 }
             ];
-            
+
+            servicos = servicosExemplo;
             salvarDados();
+            checkInitializers();
+            mostrarNotificacao('Dados de exemplo criados com sucesso!', 'sucesso');
+        }
+
+        // ========================================
+        // INICIALIZAÇÃO
+        // ========================================
+        function checkInitializers() {
             carregarServicos();
             atualizarDashboard();
-            mostrarNotificacao('4 serviços de exemplo criados!', 'sucesso');
+            document.getElementById('dataInicio').value = obterDataHojeISO();
+            document.getElementById('duracaoDias').value = 1;
+            calcularDataFim();
         }
-        
-        // Inicializa o Dashboard ao carregar a página
-        document.addEventListener('DOMContentLoaded', () => {
-            atualizarDashboard();
-        });
 
+        document.addEventListener('DOMContentLoaded', function() {
+            checkInitializers();
+            
+            // Configura data mínima para os date inputs
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelectorAll('input[type="date"]').forEach(input => {
+                input.min = today;
+            });
+        });
     </script>
 </body>
 </html>
