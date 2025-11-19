@@ -1,0 +1,24 @@
+{
+    "name": "ControlServ - Gestão de Serviços",
+    "short_name": "ControlServ",
+    "description": "Sistema de gestão de serviços para profissionais autônomos",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#10b981",
+    "theme_color": "#10b981",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiMxMGI5ODEiLz4KPHBhdGggZD0iTTk2IDQ4QzExMi44IDQ4IDEyNi42IDM0LjIgMTI2LjYgMTcuNFMxMTIuOCAwIDk2IDBTNjUuNCAxMy44IDY1LjQgMzAuNlM3OS4yIDQ4IDk2IDQ4WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTE0NCAxMjhDMTQ0IDE0NC44IDEzMC4yIDE1OCAxMTQgMTU4SDc4QzYxLjIgMTU4IDQ4IDE0NC44IDQ4IDEyOFY4MEM0OCA2My4yIDYxLjIgNTAgNzggNTBIMTE0QzEzMC44IDUwIDE0NCA2My4yIDE0NCA4MFYxMjhaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K",
+            "sizes": "192x192",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iNjQiIGZpbGw9IiMxMGI5ODEiLz4KPHBhdGggZD0iTTI1NiAxMjhDMzAwIDExMiAzNDIgODIgMzQyIDgyQzM0MiA4MiAyODggMTY4IDI1NiAxOTJDMjI0IDE2OCAxNzAgODIgMTcwIDgyQzE3MCA4MiAyMTIgMTEyIDI1NiAxMjhaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMzg0IDM0MEMzODQgMzg4IDM0NCA0MTYgMzA0IDQxNkgyMDhDMTY4IDQxNiAxMjggMzg4IDEyOCAzNDBWMjEzQzEyOCAxNzMgMTY4IDE0NCAyMDggMTQ0SDMwNEMzNDQgMTQ0IDM4NCAxNzMgMzg0IDIxM1YzNDBaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K",
+            "sizes": "512x512",
+            "type": "image/svg+xml"
+        }
+    ],
+    "categories": ["business", "productivity"],
+    "lang": "pt-BR"
+}
