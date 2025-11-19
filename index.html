@@ -8,13 +8,35 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     
-    <script src="https://accounts.google.com/gsi/client" async defer></script> 
-    <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script> 
+    <!-- Scripts do Google API com funções definidas primeiro -->
+    <script>
+        // Função gapiLoaded deve ser definida globalmente
+        function gapiLoaded() {
+            console.log('GAPI carregado, inicializando cliente...');
+            gapi.load('client', initializeGapiClient);
+        }
+        
+        // Função para quando GIS carregar
+        function gisLoaded() {
+            console.log('GIS carregado');
+        }
+        
+        // Tratamento de erro para scripts externos
+        window.addEventListener('error', function(e) {
+            if (e.target.tagName === 'SCRIPT' && !e.target.src.includes('reasonlabsapi.com')) {
+                console.warn('Script falhou ao carregar:', e.target.src);
+            }
+        });
+    </script>
+    
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script>
     
     <meta name="theme-color" content="#10b981">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="./manifest.json">
+    <link rel="manifest" href="./manifest.json" crossorigin="use-credentials">
 
     <style>
         :root {
@@ -724,24 +746,18 @@
         // ========================================
         // GOOGLE DRIVE CONFIGURAÇÃO E FUNÇÕES
         // ========================================
-        // CLIENT_ID (do contexto anterior) e API_KEY (fornecida agora)
-        const CLIENT_ID = "848934032636-f2amcpeotokq8vnbid2j5vhbgfpglins.apps.googleusercontent.com"; 
-        const API_KEY = "AIzaSyA3cbSpxa0UC3o8aTdw2VYHUaMGFUiBqp8"; // Sua API Key
+        const CLIENT_ID = "848934032636-f2amcpeotokq8vnbid2j5vhbgfpglins.apps.googleusercontent.com";
+        const API_KEY = "AIzaSyA3cbSpxa0UC3o8aTdw2VYHUaMGFUiBqp8";
         const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file'; // Permissão para gerenciar arquivos criados pelo app.
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
         const BACKUP_FILE_NAME = 'ControlServ_Backup.json';
 
         let tokenClient;
         let gapiInited = false;
         let gisInited = false;
-        let fileId = null; // Armazena o ID do arquivo de backup, se encontrado
+        let fileId = null;
 
-        // 1. Chamado pelo 'onload' do script api.js (no HTML)
-        function gapiLoaded() {
-            gapi.load('client', initializeGapiClient);
-        }
-
-        // 2. Inicializa o cliente GAPI
+        // Inicializa o cliente GAPI
         async function initializeGapiClient() {
             try {
                 await gapi.client.init({
@@ -749,26 +765,28 @@
                     discoveryDocs: DISCOVERY_DOCS,
                 });
                 gapiInited = true;
-                console.log('GAPI Client inicializado.');
-                gisLoaded(); 
+                console.log('GAPI Client inicializado com sucesso');
+                
+                // Inicializa GIS após GAPI estar pronto
+                gisLoaded();
             } catch (error) {
                 console.error('Erro ao inicializar gapi.client:', error);
-                mostrarNotificacao('Erro ao carregar a API do Drive. Verifique a API Key e as credenciais.', 'erro');
+                mostrarNotificacao('Erro ao carregar a API do Google Drive.', 'erro');
             }
         }
 
-        // 3. Inicializa o Google Identity Services (GIS)
+        // Inicializa Google Identity Services
         function gisLoaded() {
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: SCOPES,
-                callback: '', 
+                callback: '', // Será definido quando necessário
                 prompt: 'consent'
             });
             gisInited = true;
-            console.log('GIS inicializado. Pronto para solicitar token.');
+            console.log('GIS inicializado. Pronto para autenticação.');
         }
-        
+
         async function searchBackupFile() {
             try {
                 const response = await gapi.client.drive.files.list({
