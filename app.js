@@ -7,6 +7,7 @@
  */
 (function() {
     let servicos = [];
+    let novoServicoID = 1;
 
     // =========================================
     // UTILIDADES GERAIS
@@ -38,6 +39,7 @@
 
         container.appendChild(notif);
 
+        // Força o reflow para a transição funcionar
         void notif.offsetWidth; 
         notif.classList.add('show');
 
@@ -77,9 +79,7 @@
         const duracaoDiasInput = document.getElementById('duracaoDias');
         const dataFimPrevistaInput = document.getElementById('dataFimPrevista');
 
-        // Adiciona 'T00:00:00' para evitar problemas com fuso horário
         const dataInicio = new Date(dataInicioInput.value + 'T00:00:00'); 
-        // Garante que o valor lido seja um número inteiro positivo
         const duracaoDias = Math.max(1, parseInt(duracaoDiasInput.value) || 1); 
 
         if (isNaN(dataInicio.getTime())) {
@@ -88,14 +88,13 @@
         }
 
         const dataFim = new Date(dataInicio);
-        // Adiciona dias (subtraindo 1, pois o dia inicial já conta)
         dataFim.setDate(dataFim.getDate() + duracaoDias - 1);
 
         dataFimPrevistaInput.value = dataFim.toISOString().split('T')[0];
     }
 
     // =========================================
-    // LÓGICA DO LOCALSTORAGE (CRUD BÁSICO)
+    // LOCALSTORAGE (CRUD BÁSICO)
     // =========================================
 
     function salvarDados() {
@@ -117,8 +116,6 @@
     // =========================================
     // LÓGICA DE SERVIÇOS (CRUD)
     // =========================================
-    
-    let novoServicoID = 1;
 
     function adicionarServico(evento) {
         evento.preventDefault();
@@ -150,7 +147,7 @@
         mostrarNotificacao('Serviço cadastrado com sucesso!', NOTIFICACAO_TIPO.SUCESSO);
         form.reset();
         document.getElementById('dataInicio').value = obterDataHojeISO();
-        calcularDataFim(); // Recalcula a data de fim para o form limpo
+        calcularDataFim();
     }
     
     function carregarServicos() {
@@ -162,7 +159,7 @@
         const servicosFiltrados = servicos.filter(s => 
             s.descricao.toLowerCase().includes(filtro) || 
             s.cliente.toLowerCase().includes(filtro)
-        ).sort((a, b) => b.id - a.id); // Ordena do mais novo para o mais antigo
+        ).sort((a, b) => b.id - a.id);
 
         servicosFiltrados.forEach(servico => {
             const tr = tabelaBody.insertRow();
@@ -243,7 +240,6 @@
      */
     function exportarDadosJSON() {
         const data = JSON.stringify(servicos, null, 2);
-        // Cria um Blob com a codificação UTF-8
         const blob = new Blob([data], { type: 'application/json;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -294,7 +290,6 @@
     // =========================================
     
     function criarDadosExemplo() {
-        // Dados de exemplo mais completos para melhor teste
         const servicosExemplo = [
             { id: 1, descricao: "Manutenção de Servidor", cliente: "Tech Solutions", valorTotal: 300.00, dataCadastro: '2024-01-10', dataInicio: '2024-01-15', dataFimPrevista: '2024-01-16', status: STATUS.FINALIZADO, statusPagamento: "pago", observacao: "Servidor OK." },
             { id: 2, descricao: "Instalação de Rede", cliente: "Fast Foods LTDA", valorTotal: 1500.00, dataCadastro: '2024-02-01', dataInicio: '2024-02-05', dataFimPrevista: '2024-02-10', status: STATUS.EM_ANDAMENTO, statusPagamento: "pendente", observacao: "Aguardando peças." },
@@ -317,6 +312,23 @@
         mostrarNotificacao('Todos os dados locais foram apagados.', NOTIFICACAO_TIPO.ALERTA);
     }
 
+    // =========================================
+    // PWA (SERVICE WORKER)
+    // =========================================
+    
+    /**
+     * Registra o Service Worker para habilitar o PWA e o modo offline.
+     */
+    function registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then((reg) => console.log('[Service Worker] Registrado com sucesso:', reg))
+                .catch((err) => console.error('[Service Worker] Erro no registro:', err));
+        } else {
+            console.warn('Service Workers não são suportados neste navegador.');
+        }
+    }
+
 
     // =========================================
     // INICIALIZAÇÃO E ESCOPO GLOBAL CONTROLADO
@@ -330,16 +342,16 @@
         mostrarNotificacao,
         showLoading,
         hideLoading,
-        obterDataHojeISO, // Exportado para reports.js
+        obterDataHojeISO,
         calcularDataFim,
         alterarStatus,
         excluirServico,
         criarDadosExemplo,
         limparTodosDados,
         carregarServicos: carregarServicos, 
-        getServicos: () => servicos, // Getter para reports
-        exportarDadosJSON, // NOVO
-        importarDadosJSON // NOVO
+        getServicos: () => servicos,
+        exportarDadosJSON,
+        importarDadosJSON
     };
 
     /**
@@ -350,6 +362,9 @@
         carregarServicos();
         atualizarDashboard();
         
+        // ** NOVO **: Registra o Service Worker
+        registerServiceWorker(); 
+
         // Configura data inicial e min/max
         const todayISO = obterDataHojeISO();
         document.getElementById('dataInicio').value = todayISO;
@@ -359,7 +374,6 @@
         // Adiciona listener ao formulário de cadastro
         document.getElementById('formCadastro').addEventListener('submit', adicionarServico);
         
-        // Esconde o loading, pois a inicialização é rápida (sem Drive)
         hideLoading(); 
     });
 
